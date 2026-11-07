@@ -171,6 +171,14 @@ export const PaletteIcon = (p: IconProps) => (
   </Stroke>
 )
 
+export const MenuIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <line x1="4" y1="7" x2="20" y2="7" />
+    <line x1="4" y1="12" x2="20" y2="12" />
+    <line x1="4" y1="17" x2="20" y2="17" />
+  </Stroke>
+)
+
 export const FolderIcon = (p: IconProps) => (
   <Stroke {...p}>
     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
