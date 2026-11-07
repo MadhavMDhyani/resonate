@@ -51,7 +51,7 @@ export function Cover({
 
 export function MediaCard({ title, subtitle, image, to, onPlay, round }: MediaCardProps) {
   const body = (
-    <div className="group/card relative w-40 shrink-0 rounded-lg bg-panel p-3 transition-colors hover:bg-panel-hi cursor-pointer">
+    <div className="anim-lift group/card relative w-40 shrink-0 rounded-xl bg-panel p-3 transition-colors hover:bg-panel-hi cursor-pointer">
       <div className="relative mb-3">
         <Cover image={image} title={title} className="w-36 h-36 shadow-lg" round={round} />
         {onPlay && (
@@ -63,14 +63,14 @@ export function MediaCard({ title, subtitle, image, to, onPlay, round }: MediaCa
               e.stopPropagation()
               onPlay()
             }}
-            className="absolute right-2 bottom-2 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-black opacity-0 shadow-xl transition-all translate-y-1 group-hover/card:translate-y-0 group-hover/card:opacity-100 hover:scale-105"
+            className="absolute right-2 bottom-2 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-on-accent opacity-0 shadow-xl transition-all translate-y-1 group-hover/card:translate-y-0 group-hover/card:opacity-100 hover:scale-105"
           >
             <PlayIcon size={18} />
           </button>
         )}
       </div>
-      <p className="truncate text-sm font-semibold">{title}</p>
-      {subtitle && <p className="mt-0.5 truncate text-xs text-neutral-400">{subtitle}</p>}
+      <p className="truncate text-sm font-semibold text-ink">{title}</p>
+      {subtitle && <p className="mt-0.5 truncate text-xs text-ink-dim">{subtitle}</p>}
     </div>
   )
   return to ? (

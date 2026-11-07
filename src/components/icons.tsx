@@ -162,6 +162,15 @@ export const MusicIcon = (p: IconProps) => (
   </Stroke>
 )
 
+export const PaletteIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M12 22a10 10 0 1 1 10-10c0 3.5-2.5 5-5 5h-2a2 2 0 0 0-2 2c0 .8.4 1.3.4 2 0 1-.7 1-1.4 1z" />
+    <circle cx="7.5" cy="11" r="1.1" fill="currentColor" stroke="none" />
+    <circle cx="11" cy="7" r="1.1" fill="currentColor" stroke="none" />
+    <circle cx="16" cy="8.5" r="1.1" fill="currentColor" stroke="none" />
+  </Stroke>
+)
+
 export const FolderIcon = (p: IconProps) => (
   <Stroke {...p}>
     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />

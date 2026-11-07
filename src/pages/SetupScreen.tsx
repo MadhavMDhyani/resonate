@@ -22,18 +22,18 @@ export function SetupScreen({ onReady }: { onReady: () => void }) {
 
   return (
     <div className="flex h-full items-center justify-center bg-base p-6">
-      <div className="w-full max-w-md rounded-xl bg-panel p-8 shadow-2xl">
+      <div className="glass anim-rise w-full max-w-md rounded-3xl p-8">
         <div className="mb-4 flex items-center gap-2">
           <MusicIcon size={26} className="text-accent" />
-          <span className="text-xl font-extrabold tracking-tight">Resonate</span>
+          <span className="text-xl font-extrabold tracking-tight text-ink">Resonate</span>
         </div>
-        <h1 className="text-lg font-bold">One-time setup</h1>
-        <p className="mt-2 text-sm leading-5 text-neutral-400">
+        <h1 className="text-lg font-bold text-ink">One-time setup</h1>
+        <p className="mt-2 text-sm leading-5 text-ink-dim">
           Resonate streams the free Creative Commons catalog of Jamendo. To use their API you need
-          a free <span className="font-semibold text-neutral-200">client_id</span> — takes about a
-          minute, no payment, no email confirmation.
+          a free <span className="font-semibold text-ink">client_id</span> — takes about a minute,
+          no payment, no email confirmation.
         </p>
-        <ol className="mt-4 list-decimal space-y-1.5 pl-5 text-sm text-neutral-300">
+        <ol className="mt-4 list-decimal space-y-1.5 pl-5 text-sm text-ink-dim">
           <li>
             Open{' '}
             <a
@@ -47,7 +47,7 @@ export function SetupScreen({ onReady }: { onReady: () => void }) {
             and create a free account.
           </li>
           <li>
-            Go to <span className="font-semibold">Apps</span> → create an app (any name).
+            Go to <span className="font-semibold text-ink">Apps</span> → create an app (any name).
           </li>
           <li>Copy the client_id it shows you.</li>
         </ol>
@@ -65,20 +65,19 @@ export function SetupScreen({ onReady }: { onReady: () => void }) {
               setError(null)
             }}
             placeholder="Paste client_id here"
-            className="flex-1 rounded-md border border-white/10 bg-elevated px-3 py-2 text-sm outline-none placeholder:text-neutral-500 focus:border-white/30"
+            className="flex-1 rounded-full border border-hairline bg-panel-hi px-4 py-2 text-sm text-ink outline-none placeholder:text-ink-dim/60 focus:border-accent"
           />
           <button
             type="submit"
-            className="rounded-md bg-accent px-4 py-2 text-sm font-bold text-black hover:bg-accent-hover"
+            className="rounded-full bg-accent px-5 py-2 text-sm font-bold text-on-accent transition-transform hover:scale-105"
           >
             Save
           </button>
         </form>
         {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
-        <p className="mt-4 text-[11px] leading-4 text-neutral-500">
-          Alternatively, put <code className="text-neutral-300">VITE_JAMENDO_CLIENT_ID=…</code> in
-          a <code className="text-neutral-300">.env</code> file. The key is stored only in your
-          browser.
+        <p className="mt-4 text-[11px] leading-4 text-ink-dim/70">
+          Alternatively, put <code className="text-ink-dim">VITE_JAMENDO_CLIENT_ID=…</code> in a{' '}
+          <code className="text-ink-dim">.env</code> file. The key is stored only in your browser.
         </p>
       </div>
     </div>

@@ -40,13 +40,13 @@ export function ArtistPage() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm">{error}</div>
+        <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm text-ink">{error}</div>
       </div>
     )
   }
 
   return (
-    <div>
+    <div className="anim-rise">
       <header className="flex items-end gap-6 bg-gradient-to-b from-white/10 to-transparent p-6 pt-10">
         <Cover
           image={artist?.image}
@@ -55,8 +55,8 @@ export function ArtistPage() {
           className="h-36 w-36 shadow-2xl md:h-44 md:w-44"
         />
         <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-wider text-neutral-300">Artist</p>
-          <h1 className="mt-1 truncate text-3xl font-extrabold tracking-tight md:text-4xl">
+          <p className="text-xs font-bold uppercase tracking-wider text-ink-dim">Artist</p>
+          <h1 className="mt-1 truncate text-3xl font-extrabold tracking-tight text-ink md:text-4xl">
             {artist?.name ?? 'Loading…'}
           </h1>
           <button
@@ -66,7 +66,7 @@ export function ArtistPage() {
               usePlayer.getState().playQueue(topTracks, 0, `Artist — ${artist?.name ?? ''}`)
             }
             disabled={!topTracks?.length}
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-black transition-transform hover:scale-105 disabled:opacity-50"
+            className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-on-accent transition-transform hover:scale-105 disabled:opacity-50"
           >
             <PlayIcon size={16} /> Play top tracks
           </button>
@@ -97,7 +97,7 @@ export function ArtistPage() {
           {albums === null ? (
             <SkeletonCards />
           ) : albums.length === 0 ? (
-            <p className="text-sm text-neutral-500">No albums found.</p>
+            <p className="text-sm text-ink-dim/70">No albums found.</p>
           ) : (
             <CardRow>
               {albums.map((a) => (

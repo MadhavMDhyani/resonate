@@ -38,25 +38,25 @@ export function JamendoPlaylistPage() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm">{error}</div>
+        <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm text-ink">{error}</div>
       </div>
     )
   }
 
   return (
-    <div>
+    <div className="anim-rise">
       <header className="flex items-end gap-6 bg-gradient-to-b from-white/10 to-transparent p-6 pt-10">
         <Cover title={name ?? id} className="h-40 w-40 shadow-2xl" />
         <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-wider text-neutral-300">
+          <p className="text-xs font-bold uppercase tracking-wider text-ink-dim">
             Community playlist
           </p>
-          <h1 className="mt-1 text-3xl font-extrabold tracking-tight md:text-4xl">
+          <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-ink md:text-4xl">
             {name ?? 'Loading…'}
           </h1>
-          <p className="mt-2 text-sm text-neutral-300">
+          <p className="mt-2 text-sm text-ink-dim">
             {creator && <span>by {creator}</span>}
-            {tracks?.length ? <span className="text-neutral-400"> · {tracks.length} tracks</span> : null}
+            {tracks?.length ? <span className="text-ink-dim/70"> · {tracks.length} tracks</span> : null}
           </p>
           <button
             type="button"
@@ -64,7 +64,7 @@ export function JamendoPlaylistPage() {
               tracks?.length && usePlayer.getState().playQueue(tracks, 0, `Playlist — ${name ?? ''}`)
             }
             disabled={!tracks?.length}
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-black transition-transform hover:scale-105 disabled:opacity-50"
+            className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-on-accent transition-transform hover:scale-105 disabled:opacity-50"
           >
             <PlayIcon size={16} /> Play
           </button>
@@ -75,7 +75,7 @@ export function JamendoPlaylistPage() {
         {tracks === null ? (
           <SkeletonRows n={8} />
         ) : tracks.length === 0 ? (
-          <p className="py-10 text-center text-sm text-neutral-500">This playlist is empty.</p>
+          <p className="py-10 text-center text-sm text-ink-dim/70">This playlist is empty.</p>
         ) : (
           tracks.map((t, i) => (
             <TrackRow

@@ -1,12 +1,53 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+   Theme tokens.
+   Surfaces are set per-mode in CSS below; the accent trio is written at
+   runtime by useApplyTheme (Material You palette from the selected seed).
+   Tailwind v4 utilities (bg-accent, text-ink, …) resolve through these.
+--------------------------------------------------------------------------- */
 @theme {
-  --color-accent: #1db954;
-  --color-accent-hover: #1ed760;
-  --color-base: #121212;
-  --color-panel: #181818;
-  --color-panel-hi: #242424;
-  --color-elevated: #2a2a2a;
+  --color-accent: var(--x-accent, #1db954);
+  --color-accent-hover: var(--x-accent-hover, #1ed760);
+  --color-on-accent: var(--x-on-accent, #000000);
+  --color-ink: var(--x-text, #f4f4f6);
+  --color-ink-dim: var(--x-text-dim, #9b9ba3);
+  --color-base: var(--x-base, #0b0b10);
+  --color-panel: var(--x-panel, rgba(255, 255, 255, 0.055));
+  --color-panel-hi: var(--x-panel-hi, rgba(255, 255, 255, 0.11));
+  --color-elevated: var(--x-elevated, #1c1c22);
+  --color-hairline: var(--x-hairline, rgba(255, 255, 255, 0.08));
+}
+
+:root,
+html[data-theme="dark"] {
+  --x-base: #0b0b10;
+  --x-panel: rgba(255, 255, 255, 0.055);
+  --x-panel-hi: rgba(255, 255, 255, 0.11);
+  --x-elevated: #1c1c22;
+  --x-text: #f4f4f6;
+  --x-text-dim: #9b9ba3;
+  --x-hairline: rgba(255, 255, 255, 0.08);
+  --x-glass-bg: rgba(20, 20, 26, 0.55);
+  --x-glass-border: rgba(255, 255, 255, 0.09);
+  --x-glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --x-slider-track: rgba(255, 255, 255, 0.22);
+  --x-scrim: rgba(5, 5, 8, 0.45);
+}
+
+html[data-theme="light"] {
+  --x-base: #f2f2f7;
+  --x-panel: rgba(255, 255, 255, 0.62);
+  --x-panel-hi: rgba(255, 255, 255, 0.95);
+  --x-elevated: #ffffff;
+  --x-text: #17171c;
+  --x-text-dim: #5c5c66;
+  --x-hairline: rgba(0, 0, 0, 0.07);
+  --x-glass-bg: rgba(255, 255, 255, 0.6);
+  --x-glass-border: rgba(255, 255, 255, 0.75);
+  --x-glass-shadow: 0 12px 40px rgba(30, 30, 60, 0.14);
+  --x-slider-track: rgba(0, 0, 0, 0.14);
+  --x-scrim: rgba(240, 240, 246, 0.35);
 }
 
 html,
@@ -16,8 +57,8 @@ body,
 }
 
 body {
-  background-color: var(--color-base);
-  color: #fff;
+  background-color: var(--x-base, #0b0b10);
+  color: var(--x-text, #f4f4f6);
   font-family:
     "Segoe UI",
     system-ui,
@@ -26,34 +67,55 @@ body {
     "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
-/* Slim dark scrollbars */
+/* Slim, mode-aware scrollbars */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #4d4d4d transparent;
+  scrollbar-color: var(--x-text-dim, #9b9ba3) transparent;
 }
 *::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
 *::-webkit-scrollbar-thumb {
-  background: #4d4d4d;
+  background: var(--x-text-dim, #9b9ba3);
   border-radius: 8px;
 }
 *::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* Range inputs (seek / volume) */
+/* ---------------------------------------------------------------------------
+   Liquid glass
+--------------------------------------------------------------------------- */
+.glass {
+  background: var(--x-glass-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(1.7);
+  backdrop-filter: blur(24px) saturate(1.7);
+  border: 1px solid var(--x-glass-border);
+  box-shadow: var(--x-glass-shadow);
+}
+.glass-strong {
+  background: var(--x-glass-bg);
+  -webkit-backdrop-filter: blur(40px) saturate(1.9);
+  backdrop-filter: blur(40px) saturate(1.9);
+  border: 1px solid var(--x-glass-border);
+  box-shadow: var(--x-glass-shadow);
+}
+
+/* ---------------------------------------------------------------------------
+   Range inputs (seek / volume)
+--------------------------------------------------------------------------- */
 input[type="range"].slider {
   -webkit-appearance: none;
   appearance: none;
   height: 4px;
   border-radius: 2px;
   background:
-    linear-gradient(var(--fill-color, #fff) 0 0) 0 / var(--fill, 0%) 100% no-repeat,
-    #4d4d4d;
+    linear-gradient(var(--fill-color, var(--x-text, #fff)) 0 0) 0 / var(--fill, 0%) 100% no-repeat,
+    var(--x-slider-track, rgba(255, 255, 255, 0.22));
   cursor: pointer;
   outline: none;
 }
@@ -63,7 +125,7 @@ input[type="range"].slider::-webkit-slider-thumb {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--x-text, #fff);
   opacity: 0;
   transition: opacity 0.15s;
 }
@@ -79,10 +141,12 @@ input[type="range"].slider::-moz-range-thumb {
   height: 12px;
   border: none;
   border-radius: 50%;
-  background: #fff;
+  background: var(--x-text, #fff);
 }
 
-/* Equal-width grid rows that keep a consistent card rhythm */
+/* ---------------------------------------------------------------------------
+   Motion
+--------------------------------------------------------------------------- */
 .row-scroll {
   scrollbar-width: none;
 }
@@ -116,5 +180,97 @@ input[type="range"].slider::-moz-range-thumb {
   }
   50% {
     height: 12px;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.anim-rise {
+  animation: rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.anim-scale-in {
+  animation: scale-in 0.18s ease-out both;
+  transform-origin: top right;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.anim-fade {
+  animation: fade-in 0.3s ease-out both;
+}
+
+/* Cover-flow cards (2D transforms — see NowPlaying cardStyle comment) */
+.cf-scene {
+  transform: translateZ(0);
+}
+.cf-card {
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.5s ease,
+    filter 0.5s ease;
+  will-change: transform;
+}
+
+/* Ambient artwork backdrop inside the Now Playing view */
+.anim-ambient {
+  animation: ambient-drift 24s ease-in-out infinite;
+}
+@keyframes ambient-drift {
+  0%,
+  100% {
+    transform: scale(1.15) translate(0, 0);
+  }
+  33% {
+    transform: scale(1.22) translate(-1.5%, 1%);
+  }
+  66% {
+    transform: scale(1.18) translate(1.5%, -1.5%);
+  }
+}
+
+/* Gentle hover lift for cards */
+.anim-lift {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s ease;
+}
+.anim-lift:hover {
+  transform: translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-rise,
+  .anim-scale-in,
+  .anim-fade,
+  .anim-ambient,
+  .eq span {
+    animation: none !important;
+  }
+  .cf-card,
+  .anim-lift {
+    transition: none !important;
   }
 }

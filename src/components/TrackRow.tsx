@@ -64,12 +64,12 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
 
   return (
     <div
-      className="group flex items-center gap-3 rounded-md px-3 py-1.5 hover:bg-white/10"
+      className="group flex items-center gap-3 rounded-md px-3 py-1.5 hover:bg-panel-hi"
       onDoubleClick={play}
       data-track-id={track.id}
     >
       {index !== undefined && (
-        <div className="w-5 shrink-0 text-center text-sm text-neutral-400">
+        <div className="w-5 shrink-0 text-center text-sm text-ink-dim">
           {active ? (
             <span className="eq" aria-label="Playing">
               <span />
@@ -84,7 +84,7 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
               type="button"
               aria-label={`Play ${track.title}`}
               onClick={play}
-              className="hidden text-white group-hover:block"
+              className="hidden text-ink group-hover:block"
             >
               <PlayIcon size={14} />
             </button>
@@ -106,18 +106,18 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
         className="relative shrink-0"
       >
         <Cover image={track.cover} title={track.title} className="h-10 w-10" />
-        <span className="absolute inset-0 flex items-center justify-center rounded-md bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+        <span className="absolute inset-0 flex items-center justify-center rounded-md bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100">
           {active ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
         </span>
       </button>
 
       <div className="min-w-0 flex-1">
-        <p className={`truncate text-sm font-medium ${isCurrent ? 'text-accent-hover' : ''}`}>
+        <p className={`truncate text-sm font-medium ${isCurrent ? 'text-accent-hover' : 'text-ink'}`}>
           {track.title}
         </p>
-        <p className="truncate text-xs text-neutral-400">
+        <p className="truncate text-xs text-ink-dim">
           {track.source === 'jamendo' && track.artistId ? (
-            <Link to={`/artist/${track.artistId}`} className="hover:text-white hover:underline">
+            <Link to={`/artist/${track.artistId}`} className="hover:text-ink hover:underline">
               {track.artist}
             </Link>
           ) : (
@@ -127,9 +127,9 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
       </div>
 
       {showAlbum && (
-        <div className="hidden w-1/4 min-w-0 truncate text-xs text-neutral-400 md:block">
+        <div className="hidden w-1/4 min-w-0 truncate text-xs text-ink-dim md:block">
           {track.source === 'jamendo' && track.albumId ? (
-            <Link to={`/album/${track.albumId}`} className="hover:text-white hover:underline">
+            <Link to={`/album/${track.albumId}`} className="hover:text-ink hover:underline">
               {track.album}
             </Link>
           ) : (
@@ -143,7 +143,7 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
         aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
         onClick={() => void toggleFavorite(track)}
         className={`shrink-0 transition-opacity ${
-          isFav ? 'text-accent-hover opacity-100' : 'text-neutral-300 opacity-0 group-hover:opacity-100 hover:text-white'
+          isFav ? 'text-accent-hover opacity-100' : 'text-ink-dim opacity-0 group-hover:opacity-100 hover:text-ink'
         }`}
       >
         {isFav ? <HeartFilledIcon size={16} /> : <HeartIcon size={16} />}
@@ -154,13 +154,13 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
           type="button"
           aria-label="Add to playlist"
           onClick={() => setMenuOpen((o) => !o)}
-          className="text-neutral-300 opacity-0 transition-opacity group-hover:opacity-100 hover:text-white"
+          className="text-ink-dim opacity-0 transition-opacity group-hover:opacity-100 hover:text-ink"
         >
           <MoreIcon size={16} />
         </button>
         {menuOpen && (
-          <div className="absolute right-0 top-6 z-30 w-56 rounded-md border border-white/10 bg-elevated p-1 shadow-2xl">
-            <p className="px-2 py-1 text-xs font-semibold text-neutral-400">Add to playlist</p>
+          <div className="glass anim-scale-in absolute right-0 top-6 z-30 w-56 rounded-xl p-1">
+            <p className="px-2 py-1 text-xs font-semibold text-ink-dim">Add to playlist</p>
             <div className="max-h-44 overflow-y-auto">
               {(playlists ?? []).map((pl) => (
                 <button
@@ -170,17 +170,17 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
                     void addToPlaylist(pl.id as number, track)
                     setMenuOpen(false)
                   }}
-                  className="block w-full truncate rounded px-2 py-1.5 text-left text-sm hover:bg-white/10"
+                  className="block w-full truncate rounded px-2 py-1.5 text-left text-sm text-ink hover:bg-panel-hi"
                 >
                   {pl.name}
                 </button>
               ))}
               {playlists && playlists.length === 0 && (
-                <p className="px-2 py-1.5 text-xs text-neutral-500">No playlists yet</p>
+                <p className="px-2 py-1.5 text-xs text-ink-dim/70">No playlists yet</p>
               )}
             </div>
             <form
-              className="mt-1 flex items-center gap-1 border-t border-white/10 px-1 pt-1"
+              className="mt-1 flex items-center gap-1 border-t border-hairline px-1 pt-1"
               onSubmit={(e) => {
                 e.preventDefault()
                 const input = e.currentTarget.elements.namedItem('name') as HTMLInputElement
@@ -192,9 +192,9 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
               <input
                 name="name"
                 placeholder="New playlist name"
-                className="min-w-0 flex-1 rounded bg-white/10 px-2 py-1 text-sm outline-none placeholder:text-neutral-500"
+                className="min-w-0 flex-1 rounded bg-panel-hi px-2 py-1 text-sm text-ink outline-none placeholder:text-ink-dim/60"
               />
-              <button type="submit" aria-label="Create playlist" className="p-1 text-accent-hover hover:text-white">
+              <button type="submit" aria-label="Create playlist" className="p-1 text-accent-hover hover:text-ink">
                 <PlusIcon size={14} />
               </button>
             </form>
@@ -210,7 +210,7 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
           aria-label={`Download ${track.title} (free, ${track.license ?? 'Creative Commons'})`}
           title={`Free download — ${track.license ?? 'Creative Commons'}`}
           onClick={() => void downloadTrack(track)}
-          className="shrink-0 text-neutral-300 opacity-0 transition-opacity group-hover:opacity-100 hover:text-accent-hover"
+          className="shrink-0 text-ink-dim opacity-0 transition-opacity group-hover:opacity-100 hover:text-accent-hover"
         >
           <DownloadIcon size={16} />
         </button>
@@ -222,14 +222,14 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
           target="_blank"
           rel="noreferrer"
           title={`${track.license} — click for license details`}
-          className="shrink-0 rounded border border-white/15 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-neutral-400 opacity-60 transition-opacity hover:opacity-100 hover:text-white"
+          className="shrink-0 rounded border border-hairline px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-ink-dim opacity-60 transition-opacity hover:opacity-100 hover:text-ink"
           onClick={(e) => e.stopPropagation()}
         >
           {track.license === 'Local file' ? 'local' : 'cc'}
         </a>
       )}
 
-      <span className="w-10 shrink-0 text-right text-sm tabular-nums text-neutral-400">
+      <span className="w-10 shrink-0 text-right text-sm tabular-nums text-ink-dim">
         {fmtTime(track.duration)}
       </span>
     </div>

@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { hasClientId } from './api/jamendo'
 import { useAudioEngine } from './hooks/useAudioEngine'
+import { useApplyTheme } from './theme/themeStore'
 import { Sidebar } from './components/Sidebar'
 import { PlayerBar } from './components/PlayerBar'
 import { QueuePanel } from './components/QueuePanel'
+import { NowPlaying } from './components/NowPlaying'
 import { Home } from './pages/Home'
 import { Search } from './pages/Search'
 import { AlbumPage } from './pages/Album'
@@ -27,10 +29,7 @@ function Shell() {
     <div className="flex h-full flex-col">
       <div className="flex min-h-0 flex-1 gap-2 px-2 pt-2">
         <Sidebar />
-        <main
-          ref={mainRef}
-          className="min-w-0 flex-1 overflow-y-auto rounded-lg bg-panel"
-        >
+        <main ref={mainRef} className="min-w-0 flex-1 overflow-y-auto rounded-2xl bg-panel">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/search" element={<Search />} />
@@ -46,6 +45,7 @@ function Shell() {
         <QueuePanel />
       </div>
       <PlayerBar />
+      <NowPlaying />
     </div>
   )
 }
@@ -53,8 +53,10 @@ function Shell() {
 export default function App() {
   const [ready, setReady] = useState(() => hasClientId())
 
-  // Mount exactly once at the root: owns the <audio> element wiring.
+  // Mount exactly once at the root: owns the <audio> element wiring and the
+  // theme variables (dark/light + Material You accent).
   useAudioEngine()
+  useApplyTheme()
 
   if (!ready) return <SetupScreen onReady={() => setReady(true)} />
   return <Shell />

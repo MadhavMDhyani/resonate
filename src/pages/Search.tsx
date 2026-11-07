@@ -78,19 +78,19 @@ export function Search() {
   const hasQuery = q.trim().length >= 2
 
   return (
-    <div className="p-6">
-      <div className="sticky top-0 z-10 -mx-6 mb-6 bg-base/95 px-6 py-3 backdrop-blur">
+    <div className="anim-rise p-6">
+      <div className="sticky top-0 z-10 -mx-6 mb-6 bg-base/80 px-6 py-3 backdrop-blur">
         <div className="relative max-w-xl">
           <SearchIcon
             size={18}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-dim"
           />
           <input
             autoFocus
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Tracks, albums, artists, or your local files…"
-            className="w-full rounded-full border border-white/10 bg-elevated py-2.5 pl-10 pr-4 text-sm outline-none placeholder:text-neutral-500 focus:border-white/30"
+            className="w-full rounded-full border border-hairline bg-panel-hi py-2.5 pl-10 pr-4 text-sm text-ink outline-none placeholder:text-ink-dim/60 focus:border-accent"
             aria-label="Search"
           />
         </div>
@@ -98,13 +98,13 @@ export function Search() {
 
       {error && (
         <div className="mb-6 rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm">
-          <p className="font-semibold">Search failed</p>
-          <p className="mt-1 text-neutral-300">{error}</p>
+          <p className="font-semibold text-ink">Search failed</p>
+          <p className="mt-1 text-ink-dim">{error}</p>
         </div>
       )}
 
       {!hasQuery && (
-        <p className="py-16 text-center text-sm text-neutral-500">
+        <p className="py-16 text-center text-sm text-ink-dim/70">
           Type at least 2 characters to search the Creative Commons catalog and your library.
         </p>
       )}
@@ -174,6 +174,6 @@ export function Search() {
 
 function Empty({ children }: { children: React.ReactNode }) {
   return (
-    <p className="rounded-lg bg-panel p-6 text-center text-sm text-neutral-500">{children}</p>
+    <p className="rounded-lg bg-panel p-6 text-center text-sm text-ink-dim/70">{children}</p>
   )
 }

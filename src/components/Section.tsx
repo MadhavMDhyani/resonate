@@ -13,8 +13,8 @@ export function Section({
     <section className="mb-8">
       <div className="mb-3 flex items-end justify-between">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">{title}</h2>
-          {subtitle && <p className="text-sm text-neutral-400">{subtitle}</p>}
+          <h2 className="text-xl font-bold tracking-tight text-ink">{title}</h2>
+          {subtitle && <p className="text-sm text-ink-dim">{subtitle}</p>}
         </div>
       </div>
       {children}

@@ -36,7 +36,7 @@ export function AlbumPage() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm">{error}</div>
+        <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm text-ink">{error}</div>
       </div>
     )
   }
@@ -44,7 +44,7 @@ export function AlbumPage() {
   const context = `Album — ${album?.title ?? ''}`
 
   return (
-    <div>
+    <div className="anim-rise">
       <header className="flex flex-col items-start gap-6 bg-gradient-to-b from-white/10 to-transparent p-6 pt-10 md:flex-row md:items-end">
         <Cover
           image={album?.cover}
@@ -52,26 +52,26 @@ export function AlbumPage() {
           className="h-40 w-40 shadow-2xl md:h-48 md:w-48"
         />
         <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-wider text-neutral-300">Album</p>
-          <h1 className="mt-1 text-3xl font-extrabold tracking-tight md:text-4xl">
+          <p className="text-xs font-bold uppercase tracking-wider text-ink-dim">Album</p>
+          <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-ink md:text-4xl">
             {album?.title ?? 'Loading…'}
           </h1>
-          <p className="mt-2 text-sm text-neutral-300">
+          <p className="mt-2 text-sm text-ink-dim">
             {album && album.artistId ? (
-              <Link to={`/artist/${album.artistId}`} className="font-semibold text-white hover:underline">
+              <Link to={`/artist/${album.artistId}`} className="font-semibold text-ink hover:underline">
                 {album.artist}
               </Link>
             ) : (
               album?.artist
             )}
             {album?.releaseDate && (
-              <span className="text-neutral-400">
+              <span className="text-ink-dim">
                 {' '}
                 · {new Date(album.releaseDate).getFullYear() || ''}
               </span>
             )}
             {album?.trackCount ? (
-              <span className="text-neutral-400"> · {album.trackCount} tracks</span>
+              <span className="text-ink-dim"> · {album.trackCount} tracks</span>
             ) : null}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -81,7 +81,7 @@ export function AlbumPage() {
                 tracks?.length && usePlayer.getState().playQueue(tracks, 0, context)
               }
               disabled={!tracks?.length}
-              className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-black transition-transform hover:scale-105 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-on-accent transition-transform hover:scale-105 disabled:opacity-50"
             >
               <PlayIcon size={16} /> Play
             </button>
@@ -95,7 +95,7 @@ export function AlbumPage() {
                 p.playQueue(tracks, Math.floor(Math.random() * tracks.length), context)
               }}
               disabled={!tracks?.length}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 text-neutral-200 hover:border-accent-hover hover:text-accent-hover disabled:opacity-50"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-hairline text-ink hover:border-accent-hover hover:text-accent-hover disabled:opacity-50"
               title="Shuffle"
             >
               <ShuffleIcon size={16} />
@@ -104,14 +104,14 @@ export function AlbumPage() {
               <button
                 type="button"
                 onClick={() => album.zip && window.open(album.zip, '_blank', 'noopener')}
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-xs font-semibold text-neutral-200 hover:border-accent-hover hover:text-accent-hover"
+                className="inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 text-xs font-semibold text-ink hover:border-accent-hover hover:text-accent-hover"
                 title="Download the whole album as a ZIP — legally, via Jamendo"
               >
                 <DownloadIcon size={14} /> Download album (ZIP)
               </button>
             )}
             {tracks?.length && tracks[0].license ? (
-              <span className="text-[11px] text-neutral-500">{tracks[0].license}</span>
+              <span className="text-[11px] text-ink-dim/70">{tracks[0].license}</span>
             ) : null}
           </div>
         </div>
@@ -121,7 +121,7 @@ export function AlbumPage() {
         {tracks === null ? (
           <SkeletonRows n={8} />
         ) : tracks.length === 0 ? (
-          <p className="py-10 text-center text-sm text-neutral-500">This album has no tracks.</p>
+          <p className="py-10 text-center text-sm text-ink-dim/70">This album has no tracks.</p>
         ) : (
           tracks.map((t, i) => <TrackRow key={t.id} track={t} tracks={tracks} index={i} context={context} />)
         )}

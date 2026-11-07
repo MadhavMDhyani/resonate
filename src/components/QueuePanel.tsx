@@ -18,18 +18,18 @@ export function QueuePanel() {
   const upcoming = order.slice(orderPos + 1).map((ix) => ({ ix, track: queue[ix] }))
 
   return (
-    <aside className="sticky top-0 hidden h-full w-80 shrink-0 flex-col rounded-lg bg-panel p-3 lg:flex">
+    <aside className="glass sticky top-0 hidden h-full w-80 shrink-0 flex-col rounded-2xl p-3 lg:flex">
       <div className="mb-2 flex items-center justify-between px-1">
         <div>
-          <h2 className="text-base font-bold">Queue</h2>
-          {context && <p className="text-xs text-neutral-400">{context}</p>}
+          <h2 className="text-base font-bold text-ink">Queue</h2>
+          {context && <p className="text-xs text-ink-dim">{context}</p>}
         </div>
         <div className="flex items-center gap-2">
           {queue.length > 0 && (
             <button
               type="button"
               onClick={() => usePlayer.getState().clearQueue()}
-              className="text-xs text-neutral-400 hover:text-white"
+              className="text-xs text-ink-dim hover:text-ink"
             >
               Clear
             </button>
@@ -38,7 +38,7 @@ export function QueuePanel() {
             type="button"
             aria-label="Close queue"
             onClick={() => useUi.getState().setQueueOpen(false)}
-            className="text-neutral-400 hover:text-white"
+            className="text-ink-dim hover:text-ink"
           >
             <XIcon size={16} />
           </button>
@@ -46,28 +46,28 @@ export function QueuePanel() {
       </div>
 
       {queue.length === 0 ? (
-        <p className="px-1 py-8 text-center text-sm text-neutral-500">
+        <p className="px-1 py-8 text-center text-sm text-ink-dim/70">
           Queue is empty. Play something!
         </p>
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
           {current && (
             <>
-              <p className="px-1 pb-1 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+              <p className="px-1 pb-1 text-xs font-semibold uppercase tracking-wider text-ink-dim/70">
                 Now playing
               </p>
-              <div className="mb-3 flex items-center gap-2 rounded-md bg-white/5 p-2">
+              <div className="anim-rise mb-3 flex items-center gap-2 rounded-md bg-panel-hi p-2">
                 <Cover image={current.cover} title={current.title} className="h-10 w-10" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-accent-hover">{current.title}</p>
-                  <p className="truncate text-xs text-neutral-400">{current.artist}</p>
+                  <p className="truncate text-xs text-ink-dim">{current.artist}</p>
                 </div>
               </div>
             </>
           )}
 
           {upcoming.length > 0 && (
-            <p className="px-1 pb-1 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+            <p className="px-1 pb-1 text-xs font-semibold uppercase tracking-wider text-ink-dim/70">
               Next up
             </p>
           )}
@@ -75,7 +75,7 @@ export function QueuePanel() {
             {upcoming.map(({ ix, track }) => (
               <div
                 key={`${track.id}-${ix}`}
-                className="group flex items-center gap-2 rounded-md p-1.5 hover:bg-white/10"
+                className="group flex items-center gap-2 rounded-md p-1.5 hover:bg-panel-hi"
               >
                 <button
                   type="button"
@@ -84,7 +84,7 @@ export function QueuePanel() {
                   className="relative shrink-0"
                 >
                   <Cover image={track.cover} title={track.title} className="h-9 w-9" />
-                  <span className="absolute inset-0 flex items-center justify-center rounded-md bg-black/50 opacity-0 group-hover:opacity-100">
+                  <span className="absolute inset-0 flex items-center justify-center rounded-md bg-black/50 text-white opacity-0 group-hover:opacity-100">
                     <PlayIcon size={14} />
                   </span>
                 </button>
@@ -93,17 +93,17 @@ export function QueuePanel() {
                   onClick={() => usePlayer.getState().jumpTo(ix)}
                   className="min-w-0 flex-1 text-left"
                 >
-                  <p className="truncate text-sm">{track.title}</p>
-                  <p className="truncate text-xs text-neutral-400">{track.artist}</p>
+                  <p className="truncate text-sm text-ink">{track.title}</p>
+                  <p className="truncate text-xs text-ink-dim">{track.artist}</p>
                 </button>
-                <span className="shrink-0 text-xs tabular-nums text-neutral-500">
+                <span className="shrink-0 text-xs tabular-nums text-ink-dim/70">
                   {fmtTime(track.duration)}
                 </span>
                 <button
                   type="button"
                   aria-label={`Remove ${track.title} from queue`}
                   onClick={() => usePlayer.getState().removeAt(ix)}
-                  className="shrink-0 text-neutral-500 opacity-0 group-hover:opacity-100 hover:text-white"
+                  className="shrink-0 text-ink-dim/70 opacity-0 group-hover:opacity-100 hover:text-ink"
                 >
                   <XIcon size={14} />
                 </button>
