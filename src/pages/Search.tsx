@@ -79,7 +79,8 @@ export function Search() {
 
   return (
     <div className="anim-rise p-6">
-      <div className="sticky top-0 z-10 -mx-6 mb-6 bg-base/80 px-6 py-3 backdrop-blur">
+      {/* pr-14 reserves the corner slot for the pinned main-menu button. */}
+      <div className="sticky top-0 z-10 -mx-6 mb-6 bg-base/80 py-3 pl-6 pr-14 backdrop-blur">
         <div className="relative max-w-xl">
           <SearchIcon
             size={18}
