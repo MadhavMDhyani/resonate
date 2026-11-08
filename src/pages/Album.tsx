@@ -158,7 +158,7 @@ export function AlbumPage() {
           />
         ) : (
           <div>
-            <TrackTableHeader sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+            <TrackTableHeader sortKey={sortKey} sortDir={sortDir} onSort={handleSort} showAlbum={false} />
             {sortedTracks!.map((t, i) => (
               <TrackRow key={t.id} track={t} tracks={sortedTracks!} index={i} context={context} />
             ))}

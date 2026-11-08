@@ -10,19 +10,11 @@ interface ColDef {
   sortable?: boolean
 }
 
-const COLS: ColDef[] = [
-  { key: 'index', label: '#', className: 'w-8 text-center', sortable: false },
-  { key: 'title', label: 'Name', className: 'flex-1 min-w-0', sortable: true },
-  { key: 'album', label: 'Album', className: 'hidden w-1/4 min-w-0 md:block', sortable: true },
-  { key: 'license', label: 'Licence', className: 'hidden w-20 text-center md:block', sortable: true },
-  { key: 'duration', label: 'Time', className: 'hidden w-14 text-right tabular-nums md:block', sortable: true },
-]
-
 interface TrackTableHeaderProps {
   sortKey: SortKey
   sortDir: SortDir
   onSort: (key: SortKey) => void
-  /** extra space on the right for the action buttons column */
+  showAlbum?: boolean
   actionsWidth?: string
 }
 
@@ -38,19 +30,48 @@ export function TrackTableHeader({
   sortKey,
   sortDir,
   onSort,
+  showAlbum = true,
   actionsWidth = 'w-20',
 }: TrackTableHeaderProps) {
+  const cols: ColDef[] = [
+    { key: 'title', label: 'Name', className: 'flex-1 min-w-0', sortable: true },
+    ...(showAlbum
+      ? [
+          {
+            key: 'album' as SortKey,
+            label: 'Album',
+            className: 'hidden w-1/4 min-w-0 md:block',
+            sortable: true,
+          },
+        ]
+      : []),
+    {
+      key: 'license',
+      label: 'Licence',
+      className: 'hidden w-20 shrink-0 text-center md:block',
+      sortable: true,
+    },
+    {
+      key: 'duration',
+      label: 'Time',
+      className: 'hidden w-14 shrink-0 text-right tabular-nums md:block',
+      sortable: true,
+    },
+  ]
+
   return (
-    // Hidden on mobile, flex grid on md+
     <div
-      className="hidden md:flex items-center gap-2 border-b border-hairline px-3 pb-2 pt-1 label-micro select-none"
+      className="hidden md:flex items-center gap-3 border-b border-hairline px-3 pb-2 pt-1 label-micro select-none"
       role="row"
       aria-label="Track list column headers"
     >
-      {/* cover thumbnail placeholder */}
+      {/* Index column (#) */}
+      <div className="w-5 shrink-0 text-center text-ink-dim">#</div>
+
+      {/* Cover thumbnail placeholder */}
       <div className="w-10 shrink-0" />
 
-      {COLS.map((col) => {
+      {cols.map((col) => {
         const active = sortKey === col.key
         return (
           <div key={col.key} className={col.className}>
@@ -73,9 +94,8 @@ export function TrackTableHeader({
         )
       })}
 
-      {/* space for heart + more buttons */}
+      {/* Space for heart + more action buttons */}
       <div className={`${actionsWidth} shrink-0`} />
     </div>
   )
 }
-

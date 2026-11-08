@@ -479,6 +479,7 @@ export function Search() {
                         track={t}
                         tracks={localMatches}
                         index={i}
+                        showAlbum
                         highlight={q}
                         context="Local search"
                       />

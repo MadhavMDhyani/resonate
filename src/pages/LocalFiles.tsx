@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
 import {
@@ -10,10 +10,12 @@ import {
   supportsDirectoryImport,
 } from '../local/localLibrary'
 import { TrackRow } from '../components/TrackRow'
+import { TrackTableHeader, type SortKey, type SortDir } from '../components/TrackTableHeader'
 import { Section } from '../components/Section'
 import { FolderIcon, PlayIcon, QueueIcon, ShuffleIcon, XIcon } from '../components/icons'
 import { usePlayer } from '../stores/playerStore'
 import { showToast } from '../stores/toastStore'
+import { sortTracks, nextSort } from '../lib/sortTracks'
 
 export function LocalFiles() {
   const tracks = useLiveQuery(() => db.localTracks.toArray(), [])
@@ -23,7 +25,20 @@ export function LocalFiles() {
   const fileInput = useRef<HTMLInputElement>(null)
   const dirImport = supportsDirectoryImport()
 
+  const [sortKey, setSortKey] = useState<SortKey>('index')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
+
+  const handleSort = (key: SortKey) => {
+    const next = nextSort(sortKey, sortDir, key)
+    setSortKey(next.key)
+    setSortDir(next.dir)
+  }
+
   const list = (tracks ?? []).map((r) => r.track)
+  const sortedList = useMemo(
+    () => sortTracks(list, sortKey, sortDir),
+    [list, sortKey, sortDir],
+  )
 
   const refreshStale = () => {
     void countStaleHandles()
@@ -176,12 +191,14 @@ export function LocalFiles() {
           </p>
         ) : (
           <div>
-            {list.map((t, i) => (
+            <TrackTableHeader sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+            {sortedList.map((t, i) => (
               <TrackRow
                 key={t.id}
                 track={t}
-                tracks={list}
+                tracks={sortedList}
                 index={i}
+                showAlbum
                 context="Local files"
                 extraActions={
                   <button
