@@ -7,6 +7,17 @@
    Tailwind v4 utilities (bg-accent, text-ink, …) resolve through these.
 --------------------------------------------------------------------------- */
 @theme {
+  --color-accent: var(--x-accent, #d6fb00);
+  --color-accent-hover: var(--x-accent-hover, #e4ff4d);
+  --color-on-accent: var(--x-on-accent, #00323a);
+  --color-ink: var(--x-text, #eef7d4);
+  --color-ink-dim: var(--x-text-dim, #9fbf9b);
+  --color-base: var(--x-base, #021a1e);
+  --color-panel: var(--x-panel, rgba(6,38,43,0.9));
+  --color-panel-hi: var(--x-panel-hi, rgba(11,51,57,0.9));
+  --color-elevated: var(--x-elevated, #0e3a41);
+  --color-hairline: var(--x-hairline, rgba(236,255,182,0.10));
+}
   --color-accent: var(--x-accent, #1db954);
   --color-accent-hover: var(--x-accent-hover, #1ed760);
   --color-on-accent: var(--x-on-accent, #000000);

@@ -2,7 +2,9 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
-import './index.css'
+import "@fontsource-variable/archivo";
+import "@fontsource-variable/figtree";
+import "./index.css";
 import { usePlayer } from './stores/playerStore'
 import { useUi } from './ui/uiStore'
 
