@@ -13,6 +13,7 @@ import {
   DownloadIcon,
   HeartFilledIcon,
   HeartIcon,
+  MaximizeIcon,
   NextIcon,
   PauseIcon,
   PlayIcon,
@@ -158,7 +159,7 @@ export function PlayerBar() {
           </div>
         </div>
 
-        {/* Right: download, queue, volume */}
+        {/* Right: fullscreen, download, queue, volume */}
         <div className="flex w-[30%] items-center justify-end gap-3">
           {track?.source === 'jamendo' && track.audiodownload && track.downloadAllowed !== false && (
             <button
@@ -169,6 +170,17 @@ export function PlayerBar() {
               className="flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1.5 text-xs font-semibold text-ink-dim transition-colors hover:border-accent-hover hover:text-accent-hover"
             >
               <DownloadIcon size={14} /> Download
+            </button>
+          )}
+          {track && (
+            <button
+              type="button"
+              aria-label="Open fullscreen player"
+              title="Fullscreen player"
+              onClick={() => useUi.getState().setNowPlayingOpen(true)}
+              className="text-ink-dim hover:text-ink"
+            >
+              <MaximizeIcon size={17} />
             </button>
           )}
           <button

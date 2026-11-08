@@ -2,9 +2,10 @@ import { useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
+import { usePlayer } from '../stores/playerStore'
 import { useUi } from '../ui/uiStore'
 import { ThemeControls } from './ThemePicker'
-import { MusicIcon, XIcon } from './icons'
+import { MaximizeIcon, MusicIcon, XIcon } from './icons'
 
 const NAV = [
   { to: '/', label: 'Home', end: true },
@@ -20,6 +21,7 @@ const NAV = [
  */
 export function MainMenu() {
   const open = useUi((s) => s.menuOpen)
+  const hasTrack = usePlayer((s) => s.queue.length > 0)
   const playlists = useLiveQuery(
     () => db.playlists.toArray().then((list) => list.sort((a, b) => b.createdAt - a.createdAt).slice(0, 6)),
     [],
@@ -92,6 +94,20 @@ export function MainMenu() {
         <div className="anim-rise glass w-full max-w-xs rounded-2xl p-4" style={{ animationDelay: '440ms' }}>
           <ThemeControls />
         </div>
+
+        {hasTrack && (
+          <button
+            type="button"
+            onClick={() => {
+              useUi.getState().setMenuOpen(false)
+              useUi.getState().setNowPlayingOpen(true)
+            }}
+            className="anim-rise flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-ink-dim transition-colors hover:text-ink"
+            style={{ animationDelay: '500ms' }}
+          >
+            <MaximizeIcon size={14} /> Fullscreen — now playing
+          </button>
+        )}
       </div>
     </div>
   )

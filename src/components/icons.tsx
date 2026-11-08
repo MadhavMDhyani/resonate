@@ -179,6 +179,15 @@ export const MenuIcon = (p: IconProps) => (
   </Stroke>
 )
 
+export const MaximizeIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+    <path d="M16 3h3a2 2 0 0 1 2 2v3" />
+    <path d="M8 21H5a2 2 0 0 1-2-2v-3" />
+    <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+  </Stroke>
+)
+
 export const FolderIcon = (p: IconProps) => (
   <Stroke {...p}>
     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
