@@ -21,7 +21,7 @@ export function SetupScreen({ onReady }: { onReady: () => void }) {
   }
 
   return (
-    <div className="flex h-full items-center justify-center bg-base p-6">
+    <div className="flex h-dvh items-center justify-center bg-base p-6">
       <div className="glass anim-rise w-full max-w-md rounded-3xl p-8">
         <div className="mb-4 flex items-center gap-2">
           <MusicIcon size={26} className="text-accent" />

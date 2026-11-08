@@ -51,7 +51,7 @@ export function MainMenu() {
         <XIcon size={18} />
       </button>
 
-      <div className="relative z-10 flex h-full flex-col items-center gap-7 overflow-y-auto px-6 py-10">
+      <div className="relative z-10 flex h-dvh flex-col items-center gap-7 overflow-y-auto px-6 py-10">
         <div className="anim-rise flex items-center gap-2">
           <MusicIcon size={26} className="text-accent" />
           <span className="text-xl font-extrabold tracking-tight text-ink">Resonate</span>

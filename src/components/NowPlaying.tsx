@@ -15,6 +15,7 @@ import {
   PauseIcon,
   PlayIcon,
   PrevIcon,
+  QueueIcon,
   RepeatIcon,
   RepeatOneIcon,
   ShuffleIcon,
@@ -27,25 +28,57 @@ import {
  *  2D transforms only: perspective/rotateY subtrees trigger a compositor
  *  paint-offset bug in some embedded Chromium surfaces, shifting the whole
  *  overlay's content. Scale+fade reads nearly identically and is robust. */
-function cardStyle(offset: number, width: number): CSSProperties {
+function cardStyle(offset: number, width: number, viewportWidth: number): CSSProperties {
   const base: CSSProperties = {
     left: `calc(50% - ${width / 2}px)`,
     top: 0,
     width,
     height: width,
   }
-  const shift = width < 260 ? { near: 0.75, far: 1.3 } : { near: 1.05, far: 1.8 }
+  const isNarrow = viewportWidth < 640
+  // Prevent side cards from crossing viewport edges on small devices
+  const scaledHalf = (width * 0.72) / 2
+  const maxShift = Math.max(16, viewportWidth / 2 - scaledHalf - 12)
+  const shiftNear = isNarrow ? Math.min(maxShift, width * 0.42) : (width < 260 ? width * 0.75 : width * 1.05)
+  const shiftFar = isNarrow ? Math.min(maxShift + 25, width * 0.7) : (width < 260 ? width * 1.3 : width * 1.8)
+
   switch (offset) {
     case -2:
-      return { ...base, transform: `translateX(${-shift.far * width}px) scale(0.5)`, opacity: 0.6, filter: 'brightness(0.5)', zIndex: 1 }
+      return {
+        ...base,
+        transform: `translateX(${-shiftFar}px) scale(0.5)`,
+        opacity: isNarrow ? 0 : 0.6,
+        pointerEvents: isNarrow ? 'none' : undefined,
+        filter: 'brightness(0.5)',
+        zIndex: 1,
+      }
     case -1:
-      return { ...base, transform: `translateX(${-shift.near * width}px) scale(0.72)`, opacity: 0.85, filter: 'brightness(0.68)', zIndex: 2 }
+      return {
+        ...base,
+        transform: `translateX(${-shiftNear}px) scale(0.72)`,
+        opacity: 0.85,
+        filter: 'brightness(0.68)',
+        zIndex: 2,
+      }
     case 0:
       return { ...base, transform: 'none', opacity: 1, zIndex: 3 }
     case 1:
-      return { ...base, transform: `translateX(${shift.near * width}px) scale(0.72)`, opacity: 0.85, filter: 'brightness(0.68)', zIndex: 2 }
+      return {
+        ...base,
+        transform: `translateX(${shiftNear}px) scale(0.72)`,
+        opacity: 0.85,
+        filter: 'brightness(0.68)',
+        zIndex: 2,
+      }
     case 2:
-      return { ...base, transform: `translateX(${shift.far * width}px) scale(0.5)`, opacity: 0.6, filter: 'brightness(0.5)', zIndex: 1 }
+      return {
+        ...base,
+        transform: `translateX(${shiftFar}px) scale(0.5)`,
+        opacity: isNarrow ? 0 : 0.6,
+        pointerEvents: isNarrow ? 'none' : undefined,
+        filter: 'brightness(0.5)',
+        zIndex: 1,
+      }
     default:
       return base
   }
@@ -78,6 +111,24 @@ export function NowPlaying() {
   const shuffle = usePlayer((s) => s.shuffle)
   const repeat = usePlayer((s) => s.repeat)
   const context = usePlayer((s) => s.context)
+
+  const [viewportWidth, setViewportWidth] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth : 800,
+  )
+
+  useEffect(() => {
+    const onResize = () => setViewportWidth(window.innerWidth)
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  // Derive responsive cover dimension from single variable
+  const cardWidth = useMemo(() => {
+    if (viewportWidth < 380) return Math.min(220, Math.floor(viewportWidth * 0.62))
+    if (viewportWidth < 640) return 250
+    if (viewportWidth < 768) return 280
+    return 340
+  }, [viewportWidth])
 
   const track = queue[currentIndex]
   const layers = useCoverLayers(track?.cover)
@@ -115,7 +166,7 @@ export function NowPlaying() {
   const effDuration = duration || track?.duration || 0
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden select-none" role="dialog" aria-label="Now playing">
+    <div className="fixed inset-0 z-50 h-dvh overflow-hidden select-none" role="dialog" aria-label="Now playing">
       {/* Ambient artwork backdrop with crossfade.
           The animation lives on an oversized wrapper (160px overscan) and the
           blur on the static img inside — animating a blurred layer directly
@@ -135,28 +186,41 @@ export function NowPlaying() {
         <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 to-transparent" />
       </div>
 
-      {/* Close */}
-      <button
-        type="button"
-        aria-label="Close now playing"
-        onClick={() => useUi.getState().setNowPlayingOpen(false)}
-        className="glass absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full text-ink hover:scale-105 transition-transform"
-      >
-        <XIcon size={18} />
-      </button>
+      {/* Close & Queue top bar */}
+      <div className="absolute right-4 top-4 z-20 flex items-center gap-2">
+        <button
+          type="button"
+          aria-label="Queue"
+          onClick={() => useUi.getState().toggleQueue()}
+          className="glass flex h-10 w-10 items-center justify-center rounded-full text-ink transition-transform hover:scale-105"
+        >
+          <QueueIcon size={18} />
+        </button>
+        <button
+          type="button"
+          aria-label="Close now playing"
+          onClick={() => useUi.getState().setNowPlayingOpen(false)}
+          className="glass flex h-10 w-10 items-center justify-center rounded-full text-ink transition-transform hover:scale-105"
+        >
+          <XIcon size={18} />
+        </button>
+      </div>
 
       {/* Center: cover-flow + titles */}
-      <div className="relative z-10 flex h-full flex-col items-center justify-center gap-8 px-4 pb-44 pt-10">
+      <div className="relative z-10 flex h-dvh flex-col items-center justify-center gap-4 px-4 pb-36 pt-8 sm:gap-8 sm:pb-44 sm:pt-10">
         {track ? (
           <>
-            <div className="cf-scene relative h-[300px] w-[300px] md:h-[340px] md:w-[340px]">
+            <div
+              className="cf-scene relative"
+              style={{ width: cardWidth, height: cardWidth }}
+            >
               {cards.map(({ offset, track: t, queueIndex }) => (
                 <button
                   key={t.id}
                   type="button"
                   onClick={() => offset !== 0 && usePlayer.getState().jumpTo(queueIndex)}
                   className="cf-card absolute overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/15"
-                  style={cardStyle(offset, 300)}
+                  style={cardStyle(offset, cardWidth, viewportWidth)}
                   aria-label={offset === 0 ? undefined : `Play ${t.title}`}
                   tabIndex={offset === 0 ? 0 : -1}
                 >
@@ -167,7 +231,7 @@ export function NowPlaying() {
               {cards.length <= 1 && (
                 <div
                   className="absolute overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/15"
-                  style={cardStyle(0, 300)}
+                  style={cardStyle(0, cardWidth, viewportWidth)}
                 >
                   {track.cover ? (
                     <img src={track.cover} alt={track.title} className="h-full w-full object-cover" />
@@ -178,12 +242,11 @@ export function NowPlaying() {
               )}
             </div>
 
-
-            <div key={track.id} className="anim-rise max-w-xl text-center">
-              <p className="text-3xl font-extrabold tracking-tight text-white md:text-4xl">
+            <div key={track.id} className="anim-rise max-w-xl px-2 text-center">
+              <p className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl md:text-4xl">
                 {track.title}
               </p>
-              <p className="mt-2 text-lg text-white/70">{track.artist}</p>
+              <p className="mt-1 text-base text-white/70 sm:mt-2 sm:text-lg">{track.artist}</p>
               {context && <p className="mt-1 text-xs text-white/50">{context}</p>}
             </div>
           </>
@@ -194,8 +257,8 @@ export function NowPlaying() {
 
       {/* Seek + glass transport pill */}
       {track && (
-        <div className="absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-3 px-4 pb-6">
-          <div className="flex w-full max-w-2xl items-center gap-3">
+        <div className="absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-2.5 px-3 pb-5 sm:gap-3 sm:px-4 sm:pb-6">
+          <div className="flex w-full max-w-2xl items-center gap-2 sm:gap-3">
             <span className="w-10 text-right text-xs tabular-nums text-white/70">{fmtTime(currentTime)}</span>
             <input
               type="range"
@@ -211,8 +274,8 @@ export function NowPlaying() {
             <span className="w-10 text-xs tabular-nums text-white/70">{fmtTime(effDuration)}</span>
           </div>
 
-          <div className="glass flex w-full max-w-3xl items-center gap-3 rounded-full px-5 py-3">
-            <div className="flex items-center gap-3">
+          <div className="glass flex w-full max-w-3xl items-center justify-between gap-2 rounded-full px-3 py-2 sm:gap-3 sm:px-5 sm:py-3">
+            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
               <button
                 type="button"
                 aria-label="Shuffle"
@@ -257,7 +320,7 @@ export function NowPlaying() {
 
             <div
               key={track.id}
-              className="anim-rise ml-2 flex min-w-0 flex-1 items-center gap-3 rounded-full bg-white/10 py-1.5 pl-1.5 pr-4"
+              className="anim-rise ml-2 hidden min-w-0 flex-1 items-center gap-3 rounded-full bg-white/10 py-1.5 pl-1.5 pr-4 md:flex"
             >
               {track.cover && (
                 <img src={track.cover} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
@@ -268,7 +331,7 @@ export function NowPlaying() {
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-3">
+            <div className="flex shrink-0 items-center gap-2 sm:gap-3">
               <button
                 type="button"
                 aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
