@@ -60,7 +60,7 @@ export function Library() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="New playlist name"
-            className="flex-1 rounded-full border border-hairline bg-panel-hi px-4 py-2 text-sm text-ink outline-none placeholder:text-ink-dim/60 focus:border-accent"
+            className="flex-1 rounded-full border border-hairline bg-panel-hi px-4 py-2 text-sm text-ink outline-none placeholder:text-ink-dim focus:border-accent"
           />
           <button
             type="submit"
@@ -73,7 +73,7 @@ export function Library() {
         </form>
 
         {(playlists ?? []).length === 0 ? (
-          <p className="rounded-lg bg-panel p-6 text-sm text-ink-dim/70">
+          <p className="rounded-lg bg-panel p-6 text-sm text-ink-dim">
             No playlists yet — create one above or from any track's ⋯ menu.
           </p>
         ) : (
@@ -99,7 +99,7 @@ export function Library() {
                       e.preventDefault()
                       void deletePlaylist(pl.id)
                     }}
-                    className="absolute right-2 top-2 text-ink-dim/70 opacity-0 transition-opacity hover:text-red-400 group-hover:opacity-100"
+                    className="absolute right-2 top-2 text-ink-dim opacity-0 transition-opacity hover:text-red-400 group-hover:opacity-100"
                   >
                     <XIcon size={14} />
                   </button>
@@ -110,7 +110,7 @@ export function Library() {
         )}
       </Section>
 
-      <p className="mt-8 flex items-center gap-2 text-xs text-ink-dim/70">
+      <p className="mt-8 flex items-center gap-2 text-xs text-ink-dim">
         <HeartFilledIcon size={12} className="text-accent" />
         Favorites and playlists live in your browser (IndexedDB) — nothing leaves your device.
       </p>

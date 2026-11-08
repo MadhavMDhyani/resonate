@@ -83,7 +83,7 @@ export function UserPlaylistPage() {
 
       <div className="p-6 pt-4">
         {entries.length === 0 ? (
-          <p className="py-10 text-center text-sm text-ink-dim/70">
+          <p className="py-10 text-center text-sm text-ink-dim">
             Add tracks from anywhere using the ⋯ menu on a track row.
           </p>
         ) : (

@@ -143,7 +143,7 @@ export function LocalFiles() {
 
       <Section title={`Library (${list.length})`}>
         {tracks === null ? null : list.length === 0 ? (
-          <p className="rounded-lg bg-panel p-6 text-sm text-ink-dim/70">
+          <p className="rounded-lg bg-panel p-6 text-sm text-ink-dim">
             No local files yet. Import a folder or pick some files to get started.
           </p>
         ) : (

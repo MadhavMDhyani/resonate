@@ -91,7 +91,7 @@ export function Search() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Tracks, albums, artists, or your local files…"
-            className="w-full rounded-full border border-hairline bg-panel-hi py-2.5 pl-10 pr-4 text-sm text-ink outline-none placeholder:text-ink-dim/60 focus:border-accent"
+            className="w-full rounded-full border border-hairline bg-panel-hi py-2.5 pl-10 pr-4 text-sm text-ink outline-none placeholder:text-ink-dim focus:border-accent"
             aria-label="Search"
           />
         </div>
@@ -105,7 +105,7 @@ export function Search() {
       )}
 
       {!hasQuery && (
-        <p className="py-16 text-center text-sm text-ink-dim/70">
+        <p className="py-16 text-center text-sm text-ink-dim">
           Type at least 2 characters to search the Creative Commons catalog and your library.
         </p>
       )}
@@ -175,6 +175,6 @@ export function Search() {
 
 function Empty({ children }: { children: React.ReactNode }) {
   return (
-    <p className="rounded-lg bg-panel p-6 text-center text-sm text-ink-dim/70">{children}</p>
+    <p className="rounded-lg bg-panel p-6 text-center text-sm text-ink-dim">{children}</p>
   )
 }

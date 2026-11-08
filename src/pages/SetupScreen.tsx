@@ -65,7 +65,7 @@ export function SetupScreen({ onReady }: { onReady: () => void }) {
               setError(null)
             }}
             placeholder="Paste client_id here"
-            className="flex-1 rounded-full border border-hairline bg-panel-hi px-4 py-2 text-sm text-ink outline-none placeholder:text-ink-dim/60 focus:border-accent"
+            className="flex-1 rounded-full border border-hairline bg-panel-hi px-4 py-2 text-sm text-ink outline-none placeholder:text-ink-dim focus:border-accent"
           />
           <button
             type="submit"
@@ -75,7 +75,7 @@ export function SetupScreen({ onReady }: { onReady: () => void }) {
           </button>
         </form>
         {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
-        <p className="mt-4 text-[11px] leading-4 text-ink-dim/70">
+        <p className="mt-4 text-xs leading-4 text-ink-dim">
           Alternatively, put <code className="text-ink-dim">VITE_JAMENDO_CLIENT_ID=…</code> in a{' '}
           <code className="text-ink-dim">.env</code> file. The key is stored only in your browser.
         </p>
