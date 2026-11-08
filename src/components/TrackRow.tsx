@@ -29,6 +29,24 @@ interface TrackRowProps {
   showAlbum?: boolean
   /** extra action buttons (e.g. playlist move/remove) */
   extraActions?: ReactNode
+  highlight?: string
+}
+
+export function HighlightText({ text, query }: { text: string; query?: string }) {
+  if (!query || query.trim().length < 2) return <>{text}</>
+  const q = query.trim().toLowerCase()
+  const idx = text.toLowerCase().indexOf(q)
+  if (idx === -1) return <>{text}</>
+  const before = text.slice(0, idx)
+  const match = text.slice(idx, idx + q.length)
+  const after = text.slice(idx + q.length)
+  return (
+    <>
+      {before}
+      <mark className="rounded-xs bg-accent/25 px-0.5 font-semibold text-accent">{match}</mark>
+      <HighlightText text={after} query={query} />
+    </>
+  )
 }
 
 function formatLicense(license?: string, licenseUrl?: string, isLocal?: boolean): string {
@@ -51,7 +69,7 @@ function formatLicense(license?: string, licenseUrl?: string, isLocal?: boolean)
   return 'CC'
 }
 
-export function TrackRow({ track, tracks, index, context, showAlbum, extraActions }: TrackRowProps) {
+export function TrackRow({ track, tracks, index, context, showAlbum, extraActions, highlight }: TrackRowProps) {
   const navigate = useNavigate()
   const isCurrent = usePlayer((s) => s.queue[s.currentIndex]?.id === track.id)
   const isPlaying = usePlayer((s) => s.isPlaying)

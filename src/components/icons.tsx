@@ -208,6 +208,13 @@ export const XIcon = (p: IconProps) => (
   </Stroke>
 )
 
+export const HistoryIcon = (p: IconProps) => (
+  <Stroke {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </Stroke>
+)
+
 export const MoreIcon = (p: IconProps) => (
   <Fill {...p}>
     <circle cx="5" cy="12" r="1.8" />

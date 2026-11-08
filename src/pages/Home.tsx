@@ -1,46 +1,92 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { getNewAlbums, getPopularTracks, getTracksByTag } from '../api/jamendo'
+import { db } from '../db/db'
 import { TrackRow } from '../components/TrackRow'
 import { CardRow, Section } from '../components/Section'
-import { MediaCard } from '../components/MediaCard'
-import { PlayIcon } from '../components/icons'
+import { Cover, MediaCard, hueOf } from '../components/MediaCard'
+import { PlayIcon, SpinnerIcon } from '../components/icons'
 import { usePlayer } from '../stores/playerStore'
 import type { Album, Track } from '../types'
 
-const GENRES = ['electronic', 'acoustic', 'rock', 'jazz', 'hip-hop', 'ambient']
+export const GENRES = [
+  'electronic',
+  'chill',
+  'acoustic',
+  'rock',
+  'focus',
+  'jazz',
+  'lo-fi',
+  'hip-hop',
+  'workout',
+  'ambient',
+  'classical',
+  'world',
+]
+
+function getGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 18) return 'Good afternoon'
+  return 'Good evening'
+}
 
 export function Home() {
   const [popular, setPopular] = useState<Track[] | null>(null)
   const [albums, setAlbums] = useState<Album[] | null>(null)
   const [genreTracks, setGenreTracks] = useState<Record<string, Track[]>>({})
-  const [error, setError] = useState<string | null>(null)
+  const [loadingGenre, setLoadingGenre] = useState<string | null>(null)
+  const [popularError, setPopularError] = useState<string | null>(null)
+  const [albumsError, setAlbumsError] = useState<string | null>(null)
 
-  useEffect(() => {
-    let cancelled = false
-    setError(null)
-    void Promise.all([getPopularTracks(18), getNewAlbums(16)])
-      .then(([t, a]) => {
-        if (cancelled) return
-        setPopular(t)
-        setAlbums(a)
-      })
+  const isPlaying = usePlayer((s) => s.isPlaying)
+  const queue = usePlayer((s) => s.queue)
+
+  // Query recently played from Dexie version(2)
+  const recentHistory = useLiveQuery(
+    () => db.history.orderBy('playedAt').reverse().limit(12).toArray(),
+    [],
+  )
+
+  const loadPopular = useCallback(() => {
+    setPopularError(null)
+    setPopular(null)
+    getPopularTracks(18)
+      .then((t) => setPopular(t))
       .catch((e: unknown) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load')
+        setPopularError(e instanceof Error ? e.message : 'Failed to load popular tracks')
       })
-    return () => {
-      cancelled = true
-    }
   }, [])
 
+  const loadAlbums = useCallback(() => {
+    setAlbumsError(null)
+    setAlbums(null)
+    getNewAlbums(16)
+      .then((a) => setAlbums(a))
+      .catch((e: unknown) => {
+        setAlbumsError(e instanceof Error ? e.message : 'Failed to load albums')
+      })
+  }, [])
+
+  useEffect(() => {
+    loadPopular()
+    loadAlbums()
+  }, [loadPopular, loadAlbums])
+
   const playGenre = async (tag: string) => {
-    const existing = genreTracks[tag]
-    if (existing?.length) {
-      usePlayer.getState().playQueue(existing, 0, `${tag} radio`)
-      return
+    try {
+      setLoadingGenre(tag)
+      const existing = genreTracks[tag]
+      if (existing?.length) {
+        usePlayer.getState().playQueue(existing, 0, `${tag} radio`)
+        return
+      }
+      const tracks = await getTracksByTag(tag, 20)
+      setGenreTracks((g) => ({ ...g, [tag]: tracks }))
+      usePlayer.getState().playQueue(tracks, 0, `${tag} radio`)
+    } finally {
+      setLoadingGenre(null)
     }
-    const tracks = await getTracksByTag(tag, 20)
-    setGenreTracks((g) => ({ ...g, [tag]: tracks }))
-    usePlayer.getState().playQueue(tracks, 0, `${tag} radio`)
   }
 
   const playAlbum = async (albumId: string, albumTitle: string) => {
@@ -49,57 +95,181 @@ export function Home() {
     if (tracks.length) usePlayer.getState().playQueue(tracks, 0, `Album — ${albumTitle}`)
   }
 
+  // Quick picks: take up to 6 tracks from history or fallback to popular tracks
+  const quickPicks = useMemo(() => {
+    const tracks: Track[] = []
+    if (recentHistory?.length) {
+      for (const h of recentHistory) {
+        if (!tracks.some((t) => t.id === h.track.id)) {
+          tracks.push(h.track)
+        }
+        if (tracks.length === 6) break
+      }
+    }
+    if (tracks.length < 6 && popular?.length) {
+      for (const p of popular) {
+        if (!tracks.some((t) => t.id === p.id)) {
+          tracks.push(p)
+        }
+        if (tracks.length === 6) break
+      }
+    }
+    return tracks.slice(0, 6)
+  }, [recentHistory, popular])
+
   return (
-    <div className="anim-rise p-6">
-      {/* Hero */}
-      <div className="glass mb-8 rounded-3xl bg-gradient-to-br from-accent/25 via-panel to-panel p-8">
-        <h1 className="max-w-xl text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
-          Free music. No ads. Real downloads.
-        </h1>
-        <p className="mt-2 max-w-xl text-sm text-ink-dim">
-          Hundreds of thousands of Creative Commons tracks, streamed and downloaded legally —
-          plus your own local library, in one player.
-        </p>
-        <button
-          type="button"
-          onClick={() => popular?.length && usePlayer.getState().playQueue(popular, 0, 'Popular on Jamendo')}
-          disabled={!popular?.length}
-          className="mt-5 inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold text-on-accent transition-transform hover:scale-105 disabled:opacity-50"
-        >
-          <PlayIcon size={16} /> Start listening
-        </button>
+    <div className="anim-rise p-4 sm:p-6">
+      {/* Compact Header & Greeting */}
+      <div className="glass mb-6 rounded-2xl bg-gradient-to-br from-accent/20 via-panel to-panel p-5 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
+              {getGreeting()}
+            </h1>
+            <p className="mt-1 max-w-xl text-xs text-ink-dim sm:text-sm">
+              Free Creative Commons music streamed and downloaded legally, plus your local library.
+            </p>
+          </div>
+          <div className="flex shrink-0 items-center gap-2.5">
+            {queue.length > 0 && (
+              <button
+                type="button"
+                onClick={() => usePlayer.getState().togglePlay()}
+                className="inline-flex items-center gap-2 rounded-full border border-hairline bg-panel-hi px-4 py-2 text-xs font-semibold text-ink shadow-md transition-transform hover:scale-105 active:scale-95 sm:text-sm"
+              >
+                <PlayIcon size={14} className="text-accent" />
+                <span>{isPlaying ? 'Pause' : 'Jump back in'}</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => popular?.length && usePlayer.getState().playQueue(popular, 0, 'Popular on Jamendo')}
+              disabled={!popular?.length}
+              className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2 text-xs font-bold text-on-accent shadow-md transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 sm:text-sm"
+            >
+              <PlayIcon size={14} /> Start listening
+            </button>
+          </div>
+        </div>
       </div>
 
-      {error && (
-        <div className="mb-6 rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm">
-          <p className="font-semibold text-ink">Could not reach Jamendo</p>
-          <p className="mt-1 text-ink-dim">{error}</p>
-          <button
-            type="button"
-            onClick={() => location.reload()}
-            className="mt-2 rounded-md bg-panel-hi px-3 py-1.5 text-xs font-semibold text-ink hover:bg-elevated"
-          >
-            Retry
-          </button>
+      {/* Quick Picks row: 6 compact track tiles for 1-tap play */}
+      {quickPicks.length > 0 && (
+        <div className="mb-8">
+          <h2 className="mb-3 text-lg font-bold text-ink">Quick picks</h2>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3">
+            {quickPicks.map((t) => (
+              <div
+                key={t.id}
+                role="button"
+                tabIndex={0}
+                onClick={() => usePlayer.getState().playTrackNow(t, 'Quick picks')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    usePlayer.getState().playTrackNow(t, 'Quick picks')
+                  }
+                }}
+                className="group flex h-14 cursor-pointer items-center gap-2.5 overflow-hidden rounded-xl bg-panel p-1.5 transition-colors hover:bg-panel-hi sm:gap-3"
+              >
+                <Cover image={t.cover} title={t.title} className="h-11 w-11 shrink-0 rounded-lg" />
+                <div className="min-w-0 flex-1 pr-1">
+                  <p className="truncate text-xs font-semibold leading-tight text-ink sm:text-sm">
+                    {t.title}
+                  </p>
+                  <p className="mt-0.5 truncate text-[11px] leading-tight text-ink-dim">
+                    {t.artist}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  aria-label={`Play ${t.title}`}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    usePlayer.getState().playTrackNow(t, 'Quick picks')
+                  }}
+                  className="mr-1.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-on-accent opacity-0 shadow-md transition-all group-hover:opacity-100 group-hover:scale-105 active:scale-95 sm:mr-2"
+                >
+                  <PlayIcon size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Genre chips */}
-      <div className="row-scroll mb-8 flex gap-2 overflow-x-auto">
-        {GENRES.map((g) => (
-          <button
-            key={g}
-            type="button"
-            onClick={() => void playGenre(g)}
-            className="shrink-0 rounded-full border border-hairline bg-panel px-4 py-2 text-sm font-semibold capitalize text-ink transition-colors hover:border-accent-hover hover:text-accent-hover"
-          >
-            {g} radio
-          </button>
-        ))}
+      {/* Moods & Genres as Coloured Deterministic Gradient Tiles */}
+      <div className="mb-8">
+        <h2 className="mb-3 text-lg font-bold text-ink">Moods & Genres</h2>
+        <div className="row-scroll flex gap-2.5 overflow-x-auto pb-1">
+          {GENRES.map((g) => {
+            const h = hueOf(g)
+            const isLoading = loadingGenre === g
+            return (
+              <button
+                key={g}
+                type="button"
+                onClick={() => void playGenre(g)}
+                disabled={isLoading}
+                style={{
+                  background: `linear-gradient(135deg, hsl(${h} 55% 32%), hsl(${(h + 40) % 360} 70% 16%))`,
+                }}
+                className="group relative flex h-20 w-32 shrink-0 flex-col justify-between overflow-hidden rounded-2xl p-3 text-left shadow-md transition-transform hover:scale-105 active:scale-95 disabled:opacity-75 sm:h-22 sm:w-36"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-extrabold capitalize tracking-wide text-white">
+                    {g}
+                  </span>
+                  {isLoading ? (
+                    <SpinnerIcon size={16} className="text-white" />
+                  ) : (
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black/30 text-white/80 opacity-0 transition-opacity group-hover:opacity-100">
+                      <PlayIcon size={12} />
+                    </span>
+                  )}
+                </div>
+                <span className="text-[10px] font-medium uppercase tracking-wider text-white/60">
+                  Radio
+                </span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
+      {/* Recently Played */}
+      {recentHistory && recentHistory.length > 0 && (
+        <Section title="Recently played">
+          <CardRow>
+            {recentHistory.map(({ id, track: t }) => (
+              <MediaCard
+                key={id}
+                title={t.title}
+                subtitle={t.artist}
+                image={t.cover}
+                to={t.source === 'jamendo' && t.albumId ? `/album/${t.albumId}` : undefined}
+                onPlay={() => usePlayer.getState().playTrackNow(t, 'Recently played')}
+              />
+            ))}
+          </CardRow>
+        </Section>
+      )}
+
+      {/* Popular Right Now */}
       <Section title="Popular right now" subtitle="Most played CC tracks this week">
-        {popular === null ? (
+        {popularError ? (
+          <div className="mb-4 rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm">
+            <p className="font-semibold text-ink">Could not load popular tracks</p>
+            <p className="mt-0.5 text-xs text-ink-dim">{popularError}</p>
+            <button
+              type="button"
+              onClick={loadPopular}
+              className="mt-2.5 rounded-full bg-panel-hi px-3 py-1 text-xs font-semibold text-ink hover:bg-elevated"
+            >
+              Retry
+            </button>
+          </div>
+        ) : popular === null ? (
           <SkeletonRows />
         ) : (
           <div>
@@ -117,8 +287,21 @@ export function Home() {
         )}
       </Section>
 
+      {/* Fresh Albums */}
       <Section title="Fresh albums" subtitle="Recently released under Creative Commons">
-        {albums === null ? (
+        {albumsError ? (
+          <div className="mb-4 rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm">
+            <p className="font-semibold text-ink">Could not load albums</p>
+            <p className="mt-0.5 text-xs text-ink-dim">{albumsError}</p>
+            <button
+              type="button"
+              onClick={loadAlbums}
+              className="mt-2.5 rounded-full bg-panel-hi px-3 py-1 text-xs font-semibold text-ink hover:bg-elevated"
+            >
+              Retry
+            </button>
+          </div>
+        ) : albums === null ? (
           <SkeletonCards />
         ) : (
           <CardRow>
