@@ -1,6 +1,7 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { usePlayer } from '../stores/playerStore'
 import { useUi } from '../ui/uiStore'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 import { Cover } from './MediaCard'
 import { PlayIcon, XIcon } from './icons'
 import { fmtTime } from '../lib/format'
@@ -117,17 +118,10 @@ function QueueContent({ onClose }: { onClose: () => void }) {
 export function QueuePanel() {
   const open = useUi((s) => s.queueOpen)
   const nowPlayingOpen = useUi((s) => s.nowPlayingOpen)
+  const sheetRef = useRef<HTMLDivElement>(null)
   const close = () => useUi.getState().setQueueOpen(false)
 
-  // Esc closes
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open])
+  useFocusTrap(open, sheetRef, close)
 
   if (!open) return null
 
@@ -151,6 +145,7 @@ export function QueuePanel() {
 
         {/* Bottom sheet */}
         <div
+          ref={sheetRef}
           role="dialog"
           aria-modal="true"
           aria-label="Current queue"

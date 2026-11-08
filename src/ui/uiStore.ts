@@ -9,6 +9,9 @@ interface UiState {
   menuOpen: boolean
   setMenuOpen: (open: boolean) => void
   toggleMenu: () => void
+  shortcutsOpen: boolean
+  setShortcutsOpen: (open: boolean) => void
+  toggleShortcuts: () => void
 }
 
 export const useUi = create<UiState>((set) => ({
@@ -20,4 +23,7 @@ export const useUi = create<UiState>((set) => ({
   menuOpen: false,
   setMenuOpen: (open) => set({ menuOpen: open }),
   toggleMenu: () => set((s) => ({ menuOpen: !s.menuOpen })),
+  shortcutsOpen: false,
+  setShortcutsOpen: (open) => set({ shortcutsOpen: open }),
+  toggleShortcuts: () => set((s) => ({ shortcutsOpen: !s.shortcutsOpen })),
 }))

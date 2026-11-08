@@ -1,9 +1,10 @@
-import { useEffect } from 'react'
+import { useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
 import { usePlayer } from '../stores/playerStore'
 import { useUi } from '../ui/uiStore'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 import { ThemeControls } from './ThemePicker'
 import { MaximizeIcon, MusicIcon, XIcon } from './icons'
 
@@ -16,36 +17,38 @@ const NAV = [
 
 /**
  * Fullscreen main menu: a compact popup covering the app with large navigation,
- * playlists and theme controls. Doubles as the mobile navigation (the sidebar
- * is hidden below md).
+ * playlists, theme controls, and quick links.
  */
 export function MainMenu() {
   const open = useUi((s) => s.menuOpen)
   const hasTrack = usePlayer((s) => s.queue.length > 0)
+  const menuRef = useRef<HTMLDivElement>(null)
+
   const playlists = useLiveQuery(
     () => db.playlists.toArray().then((list) => list.sort((a, b) => b.createdAt - a.createdAt).slice(0, 6)),
     [],
   )
 
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') useUi.getState().setMenuOpen(false)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open])
+  const close = () => useUi.getState().setMenuOpen(false)
+
+  useFocusTrap(open, menuRef, close)
 
   if (!open) return null
 
   return (
-    <div className="anim-fade fixed inset-0 z-[60]" role="dialog" aria-label="Main menu">
+    <div
+      ref={menuRef}
+      className="anim-fade fixed inset-0 z-[60]"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Main menu"
+    >
       <div className="absolute inset-0 bg-base/80 backdrop-blur-2xl" />
 
       <button
         type="button"
         aria-label="Close menu"
-        onClick={() => useUi.getState().setMenuOpen(false)}
+        onClick={close}
         className="glass absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full text-ink transition-transform hover:scale-105"
       >
         <XIcon size={18} />
@@ -63,7 +66,7 @@ export function MainMenu() {
               key={item.to}
               to={item.to}
               end={item.end}
-              onClick={() => useUi.getState().setMenuOpen(false)}
+              onClick={close}
               className={({ isActive }) =>
                 `anim-rise rounded-xl px-6 py-1.5 text-3xl font-extrabold tracking-tight transition-colors md:text-4xl ${
                   isActive ? 'text-accent' : 'text-ink hover:text-accent-hover'
@@ -82,7 +85,7 @@ export function MainMenu() {
               <NavLink
                 key={pl.id}
                 to={`/library/playlist/${pl.id}`}
-                onClick={() => useUi.getState().setMenuOpen(false)}
+                onClick={close}
                 className="rounded-full border border-hairline bg-panel px-4 py-1.5 text-sm font-semibold text-ink-dim transition-colors hover:border-accent-hover hover:text-accent-hover"
               >
                 {pl.name}
@@ -95,19 +98,31 @@ export function MainMenu() {
           <ThemeControls />
         </div>
 
-        {hasTrack && (
+        <div className="anim-rise flex flex-col items-center gap-2" style={{ animationDelay: '500ms' }}>
+          {hasTrack && (
+            <button
+              type="button"
+              onClick={() => {
+                close()
+                useUi.getState().setNowPlayingOpen(true)
+              }}
+              className="flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold text-ink-dim transition-colors hover:text-ink"
+            >
+              <MaximizeIcon size={14} /> Fullscreen — now playing
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => {
-              useUi.getState().setMenuOpen(false)
-              useUi.getState().setNowPlayingOpen(true)
+              close()
+              useUi.getState().setShortcutsOpen(true)
             }}
-            className="anim-rise flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-ink-dim transition-colors hover:text-ink"
-            style={{ animationDelay: '500ms' }}
+            className="flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold text-ink-dim transition-colors hover:text-ink"
           >
-            <MaximizeIcon size={14} /> Fullscreen — now playing
+            Keyboard shortcuts (?)
           </button>
-        )}
+        </div>
       </div>
     </div>
   )
