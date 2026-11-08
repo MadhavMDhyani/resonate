@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { getAudio } from '../audio/audioSingleton'
 import type { Track } from '../types'
 
@@ -13,6 +14,7 @@ interface PlayerState {
   /** bumped on every explicit (re)load so the engine re-fires even for the same track */
   playToken: number
   isPlaying: boolean
+  isBuffering: boolean
   currentTime: number
   duration: number
   volume: number
@@ -51,20 +53,23 @@ function buildOrder(n: number, startIndex: number, shuffle: boolean): number[] {
   return [startIndex, ...rest]
 }
 
-export const usePlayer = create<PlayerState>((set, get) => ({
-  queue: [],
-  currentIndex: 0,
-  order: [],
-  orderPos: 0,
-  playToken: 0,
-  isPlaying: false,
-  currentTime: 0,
-  duration: 0,
-  volume: 0.8,
-  muted: false,
-  shuffle: false,
-  repeat: 'off',
-  context: null,
+export const usePlayer = create<PlayerState>()(
+  persist(
+    (set, get) => ({
+      queue: [],
+      currentIndex: 0,
+      order: [],
+      orderPos: 0,
+      playToken: 0,
+      isPlaying: false,
+      isBuffering: false,
+      currentTime: 0,
+      duration: 0,
+      volume: 0.8,
+      muted: false,
+      shuffle: false,
+      repeat: 'off',
+      context: null,
 
   playQueue: (tracks, startIndex = 0, context) => {
     if (!tracks.length) return
@@ -285,4 +290,26 @@ export const usePlayer = create<PlayerState>((set, get) => ({
       get().next()
     }
   },
-}))
+}),
+  {
+    name: 'resonate:player',
+    partialize: (s) => ({
+      volume: s.volume,
+      muted: s.muted,
+      shuffle: s.shuffle,
+      repeat: s.repeat,
+      queue: s.queue,
+      currentIndex: s.currentIndex,
+      currentTime: s.currentTime,
+      order: s.order,
+      orderPos: s.orderPos,
+      context: s.context,
+    }),
+    onRehydrateStorage: () => (state) => {
+      if (state) {
+        state.isPlaying = false
+        state.isBuffering = false
+      }
+    },
+  },
+))

@@ -112,41 +112,71 @@ body {
 input[type="range"].slider {
   -webkit-appearance: none;
   appearance: none;
+  height: 18px;
+  background: transparent;
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  align-items: center;
+}
+input[type="range"].slider::-webkit-slider-runnable-track {
   height: 4px;
-  border-radius: 2px;
+  border-radius: 9999px;
   background:
     linear-gradient(var(--fill-color, var(--x-text, #fff)) 0 0) 0 / var(--fill, 0%) 100% no-repeat,
     var(--x-slider-track, rgba(255, 255, 255, 0.22));
-  cursor: pointer;
-  outline: none;
+  transition: height 0.15s ease;
+}
+input[type="range"].slider:hover::-webkit-slider-runnable-track {
+  height: 6px;
+  --fill-color: var(--color-accent-hover);
 }
 input[type="range"].slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
   border-radius: 50%;
   background: var(--x-text, #fff);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, transform 0.1s;
 }
 input[type="range"].slider:hover::-webkit-slider-thumb,
-input[type="range"].slider:focus-visible::-webkit-slider-thumb {
+input[type="range"].slider:focus-visible::-webkit-slider-thumb,
+input[type="range"].slider:active::-webkit-slider-thumb {
   opacity: 1;
 }
 input[type="range"].slider:focus-visible {
   outline: 2px solid var(--color-accent);
-  outline-offset: 4px;
+  outline-offset: 2px;
 }
-input[type="range"].slider:hover {
+input[type="range"].slider::-moz-range-track {
+  height: 4px;
+  border-radius: 9999px;
+  background:
+    linear-gradient(var(--fill-color, var(--x-text, #fff)) 0 0) 0 / var(--fill, 0%) 100% no-repeat,
+    var(--x-slider-track, rgba(255, 255, 255, 0.22));
+  transition: height 0.15s ease;
+}
+input[type="range"].slider:hover::-moz-range-track {
+  height: 6px;
   --fill-color: var(--color-accent-hover);
 }
 input[type="range"].slider::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border: none;
   border-radius: 50%;
   background: var(--x-text, #fff);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+@media (hover: none) {
+  input[type="range"].slider::-webkit-slider-thumb,
+  input[type="range"].slider::-moz-range-thumb {
+    opacity: 1 !important;
+  }
 }
 
 /* ---------------------------------------------------------------------------
