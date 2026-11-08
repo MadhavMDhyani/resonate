@@ -5,6 +5,7 @@
   "description": "Free, open-source music player. Creative Commons streaming + your local files. No ads, free downloads.",
   "type": "module",
   "license": "GPL-3.0-or-later",
+  "homepage": "https://resonate.dhyani-pankaj811.workers.dev",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

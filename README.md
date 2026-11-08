@@ -1,5 +1,9 @@
 # Resonate
 
+**Live demo:** https://resonate.dhyani-pankaj811.workers.dev
+
+**Live demo:** https://resonate.dhyani-pankaj811.workers.dev
+
 **Free, open-source music player. Creative Commons streaming, free downloads, no ads — plus your own local files in the same player.**
 
 Resonate is a Spotify-style web player with one crucial difference: everything it offers is
