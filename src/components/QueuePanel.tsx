@@ -116,6 +116,7 @@ function QueueContent({ onClose }: { onClose: () => void }) {
 
 export function QueuePanel() {
   const open = useUi((s) => s.queueOpen)
+  const nowPlayingOpen = useUi((s) => s.nowPlayingOpen)
   const close = () => useUi.getState().setQueueOpen(false)
 
   // Esc closes
@@ -132,16 +133,18 @@ export function QueuePanel() {
 
   return (
     <>
-      {/* Desktop aside panel (lg+) */}
-      <aside className="glass sticky top-0 hidden h-full w-80 shrink-0 flex-col rounded-2xl p-3 lg:flex">
-        <QueueContent onClose={close} />
-      </aside>
+      {/* Desktop aside panel (lg+ only when Now Playing is not covering the screen) */}
+      {!nowPlayingOpen && (
+        <aside className="glass sticky top-0 hidden h-full w-80 shrink-0 flex-col rounded-2xl p-3 lg:flex">
+          <QueueContent onClose={close} />
+        </aside>
+      )}
 
-      {/* Mobile & tablet bottom sheet (<lg) */}
-      <div className="lg:hidden">
+      {/* Bottom sheet: rendered on <lg when browsing, and at ALL widths when Now Playing is open */}
+      <div className={nowPlayingOpen ? '' : 'lg:hidden'}>
         {/* Backdrop */}
         <div
-          className="anim-fade fixed inset-0 z-40 bg-black/60 backdrop-blur-xs"
+          className="anim-fade fixed inset-0 z-[54] bg-black/60 backdrop-blur-xs"
           onClick={close}
           aria-hidden="true"
         />
@@ -151,7 +154,7 @@ export function QueuePanel() {
           role="dialog"
           aria-modal="true"
           aria-label="Current queue"
-          className="anim-rise glass-strong fixed inset-x-0 bottom-0 z-50 flex max-h-[82dvh] flex-col rounded-t-3xl border-t border-hairline p-4 shadow-2xl"
+          className="anim-rise glass-strong fixed inset-x-0 bottom-0 z-[55] mx-auto flex max-h-[82dvh] max-w-2xl flex-col rounded-t-3xl border-t border-hairline p-4 shadow-2xl"
           style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}
         >
           {/* Drag handle */}

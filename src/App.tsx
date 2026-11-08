@@ -10,6 +10,7 @@ import { BottomTabBar } from './components/BottomTabBar'
 import { QueuePanel } from './components/QueuePanel'
 import { NowPlaying } from './components/NowPlaying'
 import { MainMenu } from './components/MainMenu'
+import { Toaster } from './components/Toaster'
 import { MenuIcon } from './components/icons'
 import { Home } from './pages/Home'
 import { Search } from './pages/Search'
@@ -64,6 +65,7 @@ function Shell() {
       <BottomTabBar />
       <NowPlaying />
       <MainMenu />
+      <Toaster />
     </div>
   )
 }
