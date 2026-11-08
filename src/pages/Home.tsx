@@ -3,11 +3,13 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { getNewAlbums, getPopularTracks, getTracksByTag } from '../api/jamendo'
 import { db } from '../db/db'
 import { TrackRow } from '../components/TrackRow'
+import { TrackTableHeader, type SortKey, type SortDir } from '../components/TrackTableHeader'
 import { CardRow, Section } from '../components/Section'
 import { Cover, MediaCard, hueOf } from '../components/MediaCard'
 import { PlayIcon, SpinnerIcon } from '../components/icons'
 import { ErrorState, SkeletonCards, SkeletonRows } from '../components/States'
 import { usePlayer } from '../stores/playerStore'
+import { sortTracks, nextSort } from '../lib/sortTracks'
 import type { Album, Track } from '../types'
 
 export const GENRES = [
@@ -39,6 +41,16 @@ export function Home() {
   const [loadingGenre, setLoadingGenre] = useState<string | null>(null)
   const [popularError, setPopularError] = useState<string | null>(null)
   const [albumsError, setAlbumsError] = useState<string | null>(null)
+
+  // Sort state for the Popular track list
+  const [popularSortKey, setPopularSortKey] = useState<SortKey>('index')
+  const [popularSortDir, setPopularSortDir] = useState<SortDir>('asc')
+
+  const handlePopularSort = (key: SortKey) => {
+    const next = nextSort(popularSortKey, popularSortDir, key)
+    setPopularSortKey(next.key)
+    setPopularSortDir(next.dir)
+  }
 
   const isPlaying = usePlayer((s) => s.isPlaying)
   const queue = usePlayer((s) => s.queue)
@@ -117,6 +129,12 @@ export function Home() {
     }
     return tracks.slice(0, 6)
   }, [recentHistory, popular])
+
+  // Sorted popular tracks
+  const sortedPopular = useMemo(
+    () => (popular ? sortTracks(popular, popularSortKey, popularSortDir) : popular),
+    [popular, popularSortKey, popularSortDir],
+  )
 
   return (
     <div className="anim-rise p-4 sm:p-6">
@@ -269,11 +287,16 @@ export function Home() {
           <SkeletonRows />
         ) : (
           <div>
-            {popular.map((t, i) => (
+            <TrackTableHeader
+              sortKey={popularSortKey}
+              sortDir={popularSortDir}
+              onSort={handlePopularSort}
+            />
+            {sortedPopular!.map((t, i) => (
               <TrackRow
                 key={t.id}
                 track={t}
-                tracks={popular}
+                tracks={sortedPopular!}
                 index={i}
                 showAlbum
                 context="Popular on Jamendo"

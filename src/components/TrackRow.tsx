@@ -183,7 +183,9 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
 
   return (
     <div
-      className="group flex min-h-[44px] items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-panel-hi sm:gap-3 sm:px-3"
+      className={`group flex min-h-[56px] items-center gap-2 rounded-lg px-2 py-1.5 transition-colors sm:gap-3 sm:px-3 ${
+        isCurrent ? 'bg-accent/10 hover:bg-accent/15' : 'hover:bg-panel-hi'
+      }`}
       onDoubleClick={play}
       onContextMenu={handleContextMenu}
       onTouchStart={handleTouchStart}
@@ -268,6 +270,16 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
           )}
         </div>
       )}
+
+      {/* Licence column – desktop only */}
+      <div className="hidden w-20 shrink-0 text-center text-xs text-ink-dim md:block">
+        {licenseText}
+      </div>
+
+      {/* Duration column – desktop only */}
+      <div className="hidden w-14 shrink-0 text-right tabular-nums text-xs text-ink-dim md:block">
+        {track.duration ? fmtTime(track.duration) : '—'}
+      </div>
 
       {/* Heart button: min 40x40px touch target, visible on touch via touch-visible */}
       <button
