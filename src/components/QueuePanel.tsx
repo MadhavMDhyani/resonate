@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { usePlayer } from '../stores/playerStore'
 import { useUi } from '../ui/uiStore'
 import { useFocusTrap } from '../hooks/useFocusTrap'

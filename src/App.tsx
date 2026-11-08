@@ -3,6 +3,8 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { hasClientId } from './api/jamendo'
 import { useAudioEngine } from './hooks/useAudioEngine'
 import { useApplyTheme } from './theme/themeStore'
+import { useGlobalShortcuts } from './hooks/useGlobalShortcuts'
+import { usePlayer } from './stores/playerStore'
 import { useUi } from './ui/uiStore'
 import { Sidebar } from './components/Sidebar'
 import { PlayerBar } from './components/PlayerBar'
@@ -10,6 +12,7 @@ import { BottomTabBar } from './components/BottomTabBar'
 import { QueuePanel } from './components/QueuePanel'
 import { NowPlaying } from './components/NowPlaying'
 import { MainMenu } from './components/MainMenu'
+import { ShortcutsDialog } from './components/ShortcutsDialog'
 import { Toaster } from './components/Toaster'
 import { MenuIcon } from './components/icons'
 import { Home } from './pages/Home'
@@ -22,9 +25,28 @@ import { UserPlaylistPage } from './pages/UserPlaylist'
 import { LocalFiles } from './pages/LocalFiles'
 import { SetupScreen } from './pages/SetupScreen'
 
+function NowPlayingAnnouncer() {
+  const track = usePlayer((s) => s.queue[s.currentIndex])
+  const [announcement, setAnnouncement] = useState('')
+
+  useEffect(() => {
+    if (track) {
+      setAnnouncement(`Now playing: ${track.title} by ${track.artist}`)
+    }
+  }, [track?.id, track?.title, track?.artist])
+
+  return (
+    <div aria-live="polite" aria-atomic="true" className="sr-only">
+      {announcement}
+    </div>
+  )
+}
+
 function Shell() {
   const { pathname } = useLocation()
   const mainRef = useRef<HTMLElement>(null)
+
+  useGlobalShortcuts()
 
   useEffect(() => {
     mainRef.current?.scrollTo(0, 0)
@@ -32,9 +54,22 @@ function Shell() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden">
+      {/* Skip to main content link for keyboard & screen reader accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only rounded-full bg-accent px-4 py-2 text-xs font-bold text-on-accent shadow-2xl"
+      >
+        Skip to content
+      </a>
+
       <div className="flex min-h-0 flex-1 gap-2 p-1.5 md:px-2 md:pt-2">
         <Sidebar />
-        <main ref={mainRef} className="min-w-0 flex-1 overflow-y-auto rounded-2xl bg-panel">
+        <main
+          ref={mainRef}
+          id="main-content"
+          tabIndex={-1}
+          className="min-w-0 flex-1 overflow-y-auto rounded-2xl bg-panel outline-none"
+        >
           {/* Compact main-menu trigger — pinned top-right while the page scrolls. */}
           <div className="sticky top-0 z-30 h-0">
             <button
@@ -65,7 +100,9 @@ function Shell() {
       <BottomTabBar />
       <NowPlaying />
       <MainMenu />
+      <ShortcutsDialog />
       <Toaster />
+      <NowPlayingAnnouncer />
     </div>
   )
 }

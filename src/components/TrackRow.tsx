@@ -408,7 +408,7 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
                   </button>
                 ))}
                 {playlists && playlists.length === 0 && (
-                  <p className="px-2 py-1 text-xs text-ink-dim/70">No playlists yet</p>
+                  <p className="px-2 py-1 text-xs text-ink-dim">No playlists yet</p>
                 )}
                 <form
                   className="mt-1 flex items-center gap-1 border-t border-hairline px-1 pt-1.5"
@@ -427,7 +427,7 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
                   <input
                     name="name"
                     placeholder="New playlist name"
-                    className="min-w-0 flex-1 rounded bg-panel-hi px-2 py-1 text-xs text-ink outline-none placeholder:text-ink-dim/60"
+                    className="min-w-0 flex-1 rounded bg-panel-hi px-2 py-1 text-xs text-ink outline-none placeholder:text-ink-dim"
                   />
                   <button
                     type="submit"
