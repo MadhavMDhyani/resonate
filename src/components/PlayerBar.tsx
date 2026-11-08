@@ -88,7 +88,7 @@ export function PlayerBar() {
               </button>
             </>
           ) : (
-            <p className="text-sm text-ink-dim/70 pl-2">Nothing playing</p>
+            <p className="text-sm text-ink-dim pl-2">Nothing playing</p>
           )}
         </div>
 

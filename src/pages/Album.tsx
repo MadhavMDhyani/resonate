@@ -111,7 +111,7 @@ export function AlbumPage() {
               </button>
             )}
             {tracks?.length && tracks[0].license ? (
-              <span className="text-[11px] text-ink-dim/70">{tracks[0].license}</span>
+              <span className="text-xs text-ink-dim">{tracks[0].license}</span>
             ) : null}
           </div>
         </div>
@@ -121,7 +121,7 @@ export function AlbumPage() {
         {tracks === null ? (
           <SkeletonRows n={8} />
         ) : tracks.length === 0 ? (
-          <p className="py-10 text-center text-sm text-ink-dim/70">This album has no tracks.</p>
+          <p className="py-10 text-center text-sm text-ink-dim">This album has no tracks.</p>
         ) : (
           tracks.map((t, i) => <TrackRow key={t.id} track={t} tracks={tracks} index={i} context={context} />)
         )}

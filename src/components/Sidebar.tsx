@@ -39,7 +39,7 @@ export function Sidebar() {
         </nav>
 
         <div className="mt-4 min-h-0 flex-1 overflow-y-auto">
-          <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-ink-dim/70">
+          <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-ink-dim">
             Playlists
           </p>
           <div className="flex flex-col">
@@ -53,7 +53,7 @@ export function Sidebar() {
               </Link>
             ))}
             {playlists && playlists.length === 0 && (
-              <p className="px-3 py-1.5 text-xs text-ink-dim/60">
+              <p className="px-3 py-1.5 text-xs text-ink-dim">
                 Create one from any track's ⋯ menu
               </p>
             )}
@@ -63,7 +63,7 @@ export function Sidebar() {
         <div className="border-t border-hairline px-1 pt-1">
           <ThemePicker />
         </div>
-        <p className="px-2 pb-1 text-[11px] leading-4 text-ink-dim/70">
+        <p className="px-2 pb-1 text-xs leading-4 text-ink-dim">
           All catalog music is Creative Commons via Jamendo. Free to play, free to download.
         </p>
       </div>

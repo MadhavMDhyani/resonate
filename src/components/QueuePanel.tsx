@@ -45,14 +45,14 @@ function QueueContent({ onClose }: { onClose: () => void }) {
       </div>
 
       {queue.length === 0 ? (
-        <p className="px-1 py-8 text-center text-sm text-ink-dim/70">
+        <p className="px-1 py-8 text-center text-sm text-ink-dim">
           Queue is empty. Play something!
         </p>
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto pr-1">
           {current && (
             <>
-              <p className="px-1 pb-1 text-xs font-semibold uppercase tracking-wider text-ink-dim/70">
+              <p className="px-1 pb-1 text-xs font-semibold uppercase tracking-wider text-ink-dim">
                 Now playing
               </p>
               <div className="anim-rise mb-3 flex items-center gap-2.5 rounded-lg bg-panel-hi p-2">
@@ -66,7 +66,7 @@ function QueueContent({ onClose }: { onClose: () => void }) {
           )}
 
           {upcoming.length > 0 && (
-            <p className="px-1 pb-1 text-xs font-semibold uppercase tracking-wider text-ink-dim/70">
+            <p className="px-1 pb-1 text-xs font-semibold uppercase tracking-wider text-ink-dim">
               Next up ({upcoming.length})
             </p>
           )}
@@ -95,14 +95,14 @@ function QueueContent({ onClose }: { onClose: () => void }) {
                   <p className="truncate text-sm text-ink">{track.title}</p>
                   <p className="truncate text-xs text-ink-dim">{track.artist}</p>
                 </button>
-                <span className="shrink-0 text-xs tabular-nums text-ink-dim/70">
+                <span className="shrink-0 text-xs tabular-nums text-ink-dim">
                   {fmtTime(track.duration)}
                 </span>
                 <button
                   type="button"
                   aria-label={`Remove ${track.title} from queue`}
                   onClick={() => usePlayer.getState().removeAt(ix)}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-dim/70 hover:bg-panel hover:text-ink lg:opacity-0 lg:group-hover:opacity-100"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-dim hover:bg-panel hover:text-ink lg:opacity-0 lg:group-hover:opacity-100"
                 >
                   <XIcon size={14} />
                 </button>
