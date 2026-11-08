@@ -18,17 +18,7 @@
   --color-elevated: var(--x-elevated, #0e3a41);
   --color-hairline: var(--x-hairline, rgba(236,255,182,0.10));
 }
-  --color-accent: var(--x-accent, #1db954);
-  --color-accent-hover: var(--x-accent-hover, #1ed760);
-  --color-on-accent: var(--x-on-accent, #000000);
-  --color-ink: var(--x-text, #f4f4f6);
-  --color-ink-dim: var(--x-text-dim, #9b9ba3);
-  --color-base: var(--x-base, #0b0b10);
-  --color-panel: var(--x-panel, rgba(255, 255, 255, 0.055));
-  --color-panel-hi: var(--x-panel-hi, rgba(255, 255, 255, 0.11));
-  --color-elevated: var(--x-elevated, #1c1c22);
-  --color-hairline: var(--x-hairline, rgba(255, 255, 255, 0.08));
-}
+
 
 :root,
 html[data-theme="dark"] {
