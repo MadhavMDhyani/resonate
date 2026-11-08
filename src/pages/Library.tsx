@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
 import { createPlaylist, deletePlaylist } from '../lib/libraryActions'
 import { TrackRow } from '../components/TrackRow'
+import { TrackTableHeader, type SortKey, type SortDir } from '../components/TrackTableHeader'
 import { MosaicCover } from '../components/MediaCard'
 import {
   FolderIcon,
@@ -17,6 +18,7 @@ import {
 } from '../components/icons'
 import { usePlayer } from '../stores/playerStore'
 import { showToast } from '../stores/toastStore'
+import { sortTracks, nextSort } from '../lib/sortTracks'
 import type { UserPlaylist } from '../types'
 
 type LibraryTab = 'playlists' | 'favorites' | 'local'
@@ -31,6 +33,26 @@ export function Library() {
 
   const [favSearch, setFavSearch] = useState('')
   const [favSort, setFavSort] = useState<FavSort>('recent')
+
+  // Sort state for the favorites track table
+  const [favTableSortKey, setFavTableSortKey] = useState<SortKey>('index')
+  const [favTableSortDir, setFavTableSortDir] = useState<SortDir>('asc')
+
+  const handleFavSort = (key: SortKey) => {
+    const next = nextSort(favTableSortKey, favTableSortDir, key)
+    setFavTableSortKey(next.key)
+    setFavTableSortDir(next.dir)
+  }
+
+  // Sort state for the local files track table
+  const [localSortKey, setLocalSortKey] = useState<SortKey>('index')
+  const [localSortDir, setLocalSortDir] = useState<SortDir>('asc')
+
+  const handleLocalSort = (key: SortKey) => {
+    const next = nextSort(localSortKey, localSortDir, key)
+    setLocalSortKey(next.key)
+    setLocalSortDir(next.dir)
+  }
 
   const favorites = useLiveQuery(() => db.favorites.toArray(), [])
   const localTracks = useLiveQuery(() => db.localTracks.toArray(), [])
@@ -85,6 +107,15 @@ export function Library() {
 
   const favTracks = useMemo(() => favList.map((f) => f.track), [favList])
   const localList = useMemo(() => (localTracks ?? []).map((r) => r.track), [localTracks])
+
+  const sortedFavTracks = useMemo(
+    () => sortTracks(favTracks, favTableSortKey, favTableSortDir),
+    [favTracks, favTableSortKey, favTableSortDir],
+  )
+  const sortedLocalList = useMemo(
+    () => sortTracks(localList, localSortKey, localSortDir),
+    [localList, localSortKey, localSortDir],
+  )
 
   const setTab = (t: LibraryTab) => {
     setParams({ tab: t })
@@ -311,11 +342,12 @@ export function Library() {
             </p>
           ) : (
             <div>
-              {favTracks.map((t, i) => (
+              <TrackTableHeader sortKey={favTableSortKey} sortDir={favTableSortDir} onSort={handleFavSort} />
+              {sortedFavTracks.map((t, i) => (
                 <TrackRow
                   key={t.id}
                   track={t}
-                  tracks={favTracks}
+                  tracks={sortedFavTracks}
                   index={i}
                   showAlbum
                   highlight={favSearch}
@@ -394,11 +426,12 @@ export function Library() {
             </div>
           ) : (
             <div>
-              {localList.map((t, i) => (
+              <TrackTableHeader sortKey={localSortKey} sortDir={localSortDir} onSort={handleLocalSort} />
+              {sortedLocalList.map((t, i) => (
                 <TrackRow
                   key={t.id}
                   track={t}
-                  tracks={localList}
+                  tracks={sortedLocalList}
                   index={i}
                   showAlbum
                   context="Local files"

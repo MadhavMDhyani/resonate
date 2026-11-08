@@ -34,3 +34,4 @@ export function nextSort(
   }
   return { key: clicked, dir: 'asc' }
 }
+

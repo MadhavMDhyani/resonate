@@ -124,6 +124,12 @@ export function Search() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Sorted version of search result tracks
+  const sortedTracks = useMemo(
+    () => (tracks ? sortTracks(tracks, sortKey, sortDir) : tracks),
+    [tracks, sortKey, sortDir],
+  )
+
   const localTracks = useLiveQuery(
     () => {
       if (q.length < 2) return Promise.resolve<LocalTrackRecord[]>([])
@@ -491,11 +497,12 @@ export function Search() {
                     ) : null
                   ) : (
                     <div>
-                      {tracks.map((t, i) => (
+                      <TrackTableHeader sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+                      {sortedTracks!.map((t, i) => (
                         <TrackRow
                           key={t.id}
                           track={t}
-                          tracks={tracks}
+                          tracks={sortedTracks!}
                           index={i}
                           showAlbum
                           highlight={q}
