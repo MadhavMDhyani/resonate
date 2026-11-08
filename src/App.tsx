@@ -30,8 +30,8 @@ function Shell() {
   }, [pathname])
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex min-h-0 flex-1 gap-2 px-2 pt-2">
+    <div className="flex h-dvh flex-col overflow-hidden">
+      <div className="flex min-h-0 flex-1 gap-2 p-1.5 md:px-2 md:pt-2">
         <Sidebar />
         <main ref={mainRef} className="min-w-0 flex-1 overflow-y-auto rounded-2xl bg-panel">
           {/* Compact main-menu trigger — pinned top-right while the page scrolls. */}
@@ -61,6 +61,7 @@ function Shell() {
         <QueuePanel />
       </div>
       <PlayerBar />
+      <BottomTabBar />
       <NowPlaying />
       <MainMenu />
     </div>
