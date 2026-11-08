@@ -69,3 +69,4 @@ export function useFocusTrap(
     }
   }, [active, containerRef, onClose])
 }
+

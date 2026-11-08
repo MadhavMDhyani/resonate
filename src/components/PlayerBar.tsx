@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
@@ -22,6 +22,7 @@ import {
   RepeatIcon,
   RepeatOneIcon,
   ShuffleIcon,
+  SpinnerIcon,
   VolumeIcon,
   VolumeMuteIcon,
 } from './icons'
@@ -33,18 +34,29 @@ function pct(el: number, total: number): string {
 export function PlayerBar() {
   const track = usePlayer((s) => s.queue[s.currentIndex])
   const isPlaying = usePlayer((s) => s.isPlaying)
+  const isBuffering = usePlayer((s) => s.isBuffering)
   const currentTime = usePlayer((s) => s.currentTime)
   const duration = usePlayer((s) => s.duration)
   const volume = usePlayer((s) => s.volume)
   const muted = usePlayer((s) => s.muted)
   const shuffle = usePlayer((s) => s.shuffle)
   const repeat = usePlayer((s) => s.repeat)
+  const context = usePlayer((s) => s.context)
   const queueOpen = useUi((s) => s.queueOpen)
+
+  const [seekTooltip, setSeekTooltip] = useState<{ x: number; time: number } | null>(null)
 
   const favRecord = useLiveQuery(() => (track ? db.favorites.get(track.id) : Promise.resolve(undefined)), [track?.id])
   const isFav = Boolean(favRecord)
 
   const effDuration = duration || track?.duration || 0
+
+  const handleSeekMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width))
+    setSeekTooltip({ x: e.clientX - rect.left, time: ratio * effDuration })
+  }
+  const handleSeekLeave = () => setSeekTooltip(null)
 
   return (
     <footer className="shrink-0 px-2 pb-1.5 md:pb-2">
@@ -67,8 +79,17 @@ export function PlayerBar() {
                 </span>
               </button>
               <div key={track.id} className="anim-rise min-w-0 flex-1">
+                {context && (
+                  <p className="truncate text-[10px] font-semibold text-accent leading-none mb-0.5">
+                    Playing from {context}
+                  </p>
+                )}
                 <p className="truncate text-sm font-medium text-ink">
-                  {track.source === 'jamendo' && track.albumId ? (
+                  {track.source === 'jamendo' && track.artistId ? (
+                    <Link to={`/artist/${track.artistId}`} className="hover:underline">
+                      {track.title}
+                    </Link>
+                  ) : track.source === 'jamendo' && track.albumId ? (
                     <Link to={`/album/${track.albumId}`} className="hover:underline">
                       {track.title}
                     </Link>
@@ -76,7 +97,15 @@ export function PlayerBar() {
                     track.title
                   )}
                 </p>
-                <p className="truncate text-xs text-ink-dim">{track.artist}</p>
+                <p className="truncate text-xs text-ink-dim">
+                  {track.source === 'jamendo' && track.artistId ? (
+                    <Link to={`/artist/${track.artistId}`} className="hover:underline hover:text-ink">
+                      {track.artist}
+                    </Link>
+                  ) : (
+                    track.artist
+                  )}
+                </p>
               </div>
               <button
                 type="button"
@@ -120,7 +149,13 @@ export function PlayerBar() {
               style={{ background: 'var(--x-text)', color: 'var(--x-base)' }}
               disabled={!track}
             >
-              {isPlaying ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
+              {isPlaying && isBuffering ? (
+                <SpinnerIcon size={18} />
+              ) : isPlaying ? (
+                <PauseIcon size={18} />
+              ) : (
+                <PlayIcon size={18} />
+              )}
             </button>
             <button
               type="button"
@@ -144,18 +179,32 @@ export function PlayerBar() {
             <span className="w-10 text-right text-[11px] tabular-nums text-ink-dim">
               {fmtTime(currentTime)}
             </span>
-            <input
-              type="range"
-              className="slider w-full"
-              min={0}
-              max={effDuration || 1}
-              step={0.1}
-              value={Math.min(currentTime, effDuration || 1)}
-              onChange={(e) => usePlayer.getState().seek(Number(e.target.value))}
-              aria-label="Seek"
-              style={{ '--fill': pct(currentTime, effDuration) } as CSSProperties}
-              disabled={!track}
-            />
+            <div
+              className="relative flex-1"
+              onMouseMove={handleSeekMove}
+              onMouseLeave={handleSeekLeave}
+            >
+              {seekTooltip && (
+                <div
+                  className="glass pointer-events-none absolute -top-7 -translate-x-1/2 rounded px-1.5 py-0.5 text-[10px] font-mono text-ink shadow-lg"
+                  style={{ left: seekTooltip.x }}
+                >
+                  {fmtTime(seekTooltip.time)}
+                </div>
+              )}
+              <input
+                type="range"
+                className="slider w-full"
+                min={0}
+                max={effDuration || 1}
+                step={0.1}
+                value={Math.min(currentTime, effDuration || 1)}
+                onChange={(e) => usePlayer.getState().seek(Number(e.target.value))}
+                aria-label="Seek"
+                style={{ '--fill': pct(currentTime, effDuration) } as CSSProperties}
+                disabled={!track}
+              />
+            </div>
             <span className="w-10 text-[11px] tabular-nums text-ink-dim">{fmtTime(effDuration)}</span>
           </div>
         </div>
@@ -244,6 +293,11 @@ export function PlayerBar() {
               <Cover image={track.cover} title={track.title} className="h-10 w-10 rounded-lg object-cover" />
             </div>
             <div className="min-w-0 flex-1 pr-1">
+              {context && (
+                <p className="truncate text-[10px] font-semibold text-accent leading-none mb-0.5">
+                  Playing from {context}
+                </p>
+              )}
               <p className="truncate text-sm font-semibold text-ink leading-tight">{track.title}</p>
               <p className="truncate text-xs text-ink-dim leading-tight">{track.artist}</p>
             </div>
@@ -265,7 +319,13 @@ export function PlayerBar() {
                 className="flex h-10 w-10 items-center justify-center rounded-full transition-transform active:scale-95"
                 style={{ background: 'var(--x-text)', color: 'var(--x-base)' }}
               >
-                {isPlaying ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
+                {isPlaying && isBuffering ? (
+                  <SpinnerIcon size={18} />
+                ) : isPlaying ? (
+                  <PauseIcon size={18} />
+                ) : (
+                  <PlayIcon size={18} />
+                )}
               </button>
               <button
                 type="button"

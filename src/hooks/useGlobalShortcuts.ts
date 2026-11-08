@@ -158,3 +158,4 @@ export function useGlobalShortcuts() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [navigate])
 }
+

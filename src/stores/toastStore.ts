@@ -35,3 +35,4 @@ export const useToast = create<ToastState>((set) => ({
 export function showToast(message: string, action?: ToastAction) {
   useToast.getState().showToast(message, action)
 }
+
