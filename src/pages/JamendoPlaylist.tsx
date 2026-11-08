@@ -56,7 +56,7 @@ export function JamendoPlaylistPage() {
           </h1>
           <p className="mt-2 text-sm text-ink-dim">
             {creator && <span>by {creator}</span>}
-            {tracks?.length ? <span className="text-ink-dim/70"> · {tracks.length} tracks</span> : null}
+            {tracks?.length ? <span className="text-ink-dim"> · {tracks.length} tracks</span> : null}
           </p>
           <button
             type="button"
@@ -75,7 +75,7 @@ export function JamendoPlaylistPage() {
         {tracks === null ? (
           <SkeletonRows n={8} />
         ) : tracks.length === 0 ? (
-          <p className="py-10 text-center text-sm text-ink-dim/70">This playlist is empty.</p>
+          <p className="py-10 text-center text-sm text-ink-dim">This playlist is empty.</p>
         ) : (
           tracks.map((t, i) => (
             <TrackRow

@@ -26,7 +26,7 @@ export function Library() {
 
       <Section title="Favorites" subtitle={`${favTracks.length} liked track${favTracks.length === 1 ? '' : 's'}`}>
         {favorites === null ? null : favTracks.length === 0 ? (
-          <p className="rounded-lg bg-panel p-6 text-sm text-ink-dim/70">
+          <p className="rounded-lg bg-panel p-6 text-sm text-ink-dim">
             Tap the ♥ on any track to collect it here.
           </p>
         ) : (

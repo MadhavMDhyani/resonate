@@ -97,7 +97,7 @@ export function ArtistPage() {
           {albums === null ? (
             <SkeletonCards />
           ) : albums.length === 0 ? (
-            <p className="text-sm text-ink-dim/70">No albums found.</p>
+            <p className="text-sm text-ink-dim">No albums found.</p>
           ) : (
             <CardRow>
               {albums.map((a) => (
