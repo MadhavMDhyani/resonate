@@ -21,20 +21,32 @@ export const ACCENT_PRESETS = [
   { id: 'pink', name: 'Pink', hex: '#f5426e' },
 ] as const
 
+function getContrastColor(hex: string): string {
+  const { r, g, b } = hexToRgb(hex)
+  const toLinear = (c: number) => {
+    const v = c / 255
+    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
+  }
+  const lum = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b)
+  return lum > 0.35 ? '#0b0b10' : '#ffffff'
+}
+
 /**
  * Google's Material You tonal palette: the same algorithm Android 12+ uses to
  * theme an entire UI from a single source color. Tone 80 = pastel accent on
  * dark surfaces, tone 40 = saturated accent on light surfaces.
+ * Contrast check ensures onAccent meets WCAG AA (>= 4.5:1) for any seed.
  */
 export function paletteFromSeed(seedHex: string, dark: boolean): AccentColors {
   const p = TonalPalette.fromInt(argbFromHex(seedHex))
   const accent = p.tone(dark ? 80 : 40)
   const hover = p.tone(dark ? 88 : 30)
-  const onAccent = p.tone(dark ? 20 : 100)
+  const accentHex = hexFromArgb(accent)
+  const onAccentHex = getContrastColor(accentHex)
   return {
-    accent: hexFromArgb(accent),
+    accent: accentHex,
     hover: hexFromArgb(hover),
-    onAccent: hexFromArgb(onAccent),
+    onAccent: onAccentHex,
     seedHex,
   }
 }

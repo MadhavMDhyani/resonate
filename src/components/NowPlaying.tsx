@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
 import { toggleFavorite } from '../lib/libraryActions'
@@ -6,6 +6,7 @@ import { downloadTrack } from '../lib/download'
 import { fmtTime } from '../lib/format'
 import { usePlayer } from '../stores/playerStore'
 import { useUi } from '../ui/uiStore'
+import { useFocusTrap } from '../hooks/useFocusTrap'
 import type { Track } from '../types'
 import {
   DownloadIcon,
@@ -152,21 +153,22 @@ export function NowPlaying() {
     return out
   }, [queue, order, orderPos])
 
-  // Esc closes.
-  useEffect(() => {
-    if (!open) return
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') useUi.getState().setNowPlayingOpen(false)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open])
+  const dialogRef = useRef<HTMLDivElement>(null)
+  const close = () => useUi.getState().setNowPlayingOpen(false)
+
+  useFocusTrap(open, dialogRef, close)
 
   if (!open) return null
   const effDuration = duration || track?.duration || 0
 
   return (
-    <div className="fixed inset-0 z-50 h-dvh overflow-hidden select-none" role="dialog" aria-label="Now playing">
+    <div
+      ref={dialogRef}
+      className="fixed inset-0 z-50 h-dvh overflow-hidden select-none"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Now playing"
+    >
       {/* Ambient artwork backdrop with crossfade.
           The animation lives on an oversized wrapper (160px overscan) and the
           blur on the static img inside — animating a blurred layer directly
