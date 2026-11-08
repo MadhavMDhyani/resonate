@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
 import { ThemePicker } from './ThemePicker'
 import { FolderIcon, HomeIcon, MusicIcon, SearchIcon } from './icons'
+import { MosaicCover } from './MediaCard'
 
 const navItem =
   'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-ink-dim transition-colors hover:text-ink'
@@ -10,8 +11,20 @@ const navItemActive = 'text-ink bg-panel-hi'
 
 export function Sidebar() {
   const playlists = useLiveQuery(
-    () =>
-      db.playlists.toArray().then((list) => list.sort((a, b) => b.createdAt - a.createdAt)),
+    async () => {
+      const list = await db.playlists.toArray()
+      const sorted = list.sort((a, b) => b.createdAt - a.createdAt)
+      return Promise.all(
+        sorted.map(async (pl) => {
+          const top4 = await db.playlistTracks.where('playlistId').equals(pl.id).limit(4).toArray()
+          const covers = top4.map((e) => e.track.cover).filter(Boolean) as string[]
+          return {
+            ...pl,
+            covers,
+          }
+        }),
+      )
+    },
     [],
   )
 
@@ -39,17 +52,18 @@ export function Sidebar() {
         </nav>
 
         <div className="mt-4 min-h-0 flex-1 overflow-y-auto">
-          <p className="px-3 pb-1 text-xs font-semibold uppercase tracking-wider text-ink-dim">
+          <p className="px-3 pb-1.5 text-xs font-semibold uppercase tracking-wider text-ink-dim">
             Playlists
           </p>
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-0.5">
             {(playlists ?? []).map((pl) => (
               <Link
                 key={pl.id}
                 to={`/library/playlist/${pl.id}`}
-                className="truncate rounded-md px-3 py-1.5 text-sm text-ink-dim hover:bg-panel-hi hover:text-ink"
+                className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm text-ink-dim hover:bg-panel-hi hover:text-ink transition-colors"
               >
-                {pl.name}
+                <MosaicCover covers={pl.covers} title={pl.name} className="h-6 w-6 shrink-0 rounded" />
+                <span className="truncate">{pl.name}</span>
               </Link>
             ))}
             {playlists && playlists.length === 0 && (

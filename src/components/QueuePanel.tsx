@@ -1,9 +1,9 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { usePlayer } from '../stores/playerStore'
 import { useUi } from '../ui/uiStore'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 import { Cover } from './MediaCard'
-import { PlayIcon, XIcon } from './icons'
+import { ArrowDownIcon, ArrowUpIcon, PlayIcon, XIcon } from './icons'
 import { fmtTime } from '../lib/format'
 
 function QueueContent({ onClose }: { onClose: () => void }) {
@@ -12,6 +12,9 @@ function QueueContent({ onClose }: { onClose: () => void }) {
   const orderPos = usePlayer((s) => s.orderPos)
   const currentIndex = usePlayer((s) => s.currentIndex)
   const context = usePlayer((s) => s.context)
+
+  const [draggedIx, setDraggedIx] = useState<number | null>(null)
+  const [dragOverIx, setDragOverIx] = useState<number | null>(null)
 
   const current = queue[currentIndex]
   const upcoming = order.slice(orderPos + 1).map((ix) => ({ ix, track: queue[ix] }))
@@ -71,10 +74,37 @@ function QueueContent({ onClose }: { onClose: () => void }) {
             </p>
           )}
           <div className="flex flex-col gap-0.5">
-            {upcoming.map(({ ix, track }) => (
+            {upcoming.map(({ ix, track }, i) => (
               <div
                 key={`${track.id}-${ix}`}
-                className="group flex min-h-[44px] items-center gap-2 rounded-lg p-1.5 hover:bg-panel-hi"
+                draggable
+                onDragStart={(ev) => {
+                  ev.dataTransfer.effectAllowed = 'move'
+                  ev.dataTransfer.setData('text/plain', String(ix))
+                  setDraggedIx(ix)
+                }}
+                onDragOver={(ev) => {
+                  ev.preventDefault()
+                  ev.dataTransfer.dropEffect = 'move'
+                  if (dragOverIx !== ix) setDragOverIx(ix)
+                }}
+                onDragEnd={() => {
+                  setDraggedIx(null)
+                  setDragOverIx(null)
+                }}
+                onDrop={(ev) => {
+                  ev.preventDefault()
+                  const fromIx = draggedIx ?? Number(ev.dataTransfer.getData('text/plain'))
+                  const toIx = ix
+                  setDraggedIx(null)
+                  setDragOverIx(null)
+                  if (fromIx !== toIx && !isNaN(fromIx)) {
+                    usePlayer.getState().moveInQueue(fromIx, toIx)
+                  }
+                }}
+                className={`group flex min-h-[44px] items-center gap-2 rounded-lg p-1.5 transition-all hover:bg-panel-hi ${
+                  draggedIx === ix ? 'opacity-35' : ''
+                } ${dragOverIx === ix ? 'border-t-2 border-accent' : ''}`}
               >
                 <button
                   type="button"
@@ -98,6 +128,32 @@ function QueueContent({ onClose }: { onClose: () => void }) {
                 <span className="shrink-0 text-xs tabular-nums text-ink-dim">
                   {fmtTime(track.duration)}
                 </span>
+                <div className="flex shrink-0 items-center">
+                  <button
+                    type="button"
+                    aria-label="Move up in queue"
+                    disabled={i === 0}
+                    onClick={() => {
+                      const prevIx = upcoming[i - 1].ix
+                      usePlayer.getState().moveInQueue(ix, prevIx)
+                    }}
+                    className="touch-visible flex h-6 w-6 items-center justify-center text-ink-dim hover:text-ink disabled:opacity-20 opacity-0 group-hover:opacity-100"
+                  >
+                    <ArrowUpIcon size={11} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Move down in queue"
+                    disabled={i === upcoming.length - 1}
+                    onClick={() => {
+                      const nextIx = upcoming[i + 1].ix
+                      usePlayer.getState().moveInQueue(ix, nextIx)
+                    }}
+                    className="touch-visible flex h-6 w-6 items-center justify-center text-ink-dim hover:text-ink disabled:opacity-20 opacity-0 group-hover:opacity-100"
+                  >
+                    <ArrowDownIcon size={11} />
+                  </button>
+                </div>
                 <button
                   type="button"
                   aria-label={`Remove ${track.title} from queue`}

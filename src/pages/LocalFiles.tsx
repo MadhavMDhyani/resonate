@@ -11,8 +11,9 @@ import {
 } from '../local/localLibrary'
 import { TrackRow } from '../components/TrackRow'
 import { Section } from '../components/Section'
-import { FolderIcon, PlayIcon, XIcon } from '../components/icons'
+import { FolderIcon, PlayIcon, QueueIcon, ShuffleIcon, XIcon } from '../components/icons'
 import { usePlayer } from '../stores/playerStore'
+import { showToast } from '../stores/toastStore'
 
 export function LocalFiles() {
   const tracks = useLiveQuery(() => db.localTracks.toArray(), [])
@@ -98,15 +99,42 @@ export function LocalFiles() {
         />
         {importing && <span className="text-sm text-ink-dim">Reading tags…</span>}
         {list.length > 0 && !importing && (
-          <button
-            type="button"
-            onClick={() =>
-              list.length && usePlayer.getState().playQueue(list, 0, 'Local files')
-            }
-            className="ml-auto inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 text-xs font-semibold text-ink hover:border-accent-hover hover:text-accent-hover"
-          >
-            <PlayIcon size={13} /> Play all ({list.length})
-          </button>
+          <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+            <button
+              type="button"
+              onClick={() =>
+                list.length && usePlayer.getState().playQueue(list, 0, 'Local files')
+              }
+              className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-xs font-bold text-on-accent shadow-sm transition-transform hover:scale-105 active:scale-95"
+            >
+              <PlayIcon size={13} /> Play all ({list.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!list.length) return
+                const rand = Math.floor(Math.random() * list.length)
+                usePlayer.getState().playQueue(list, rand, 'Local files')
+                if (!usePlayer.getState().shuffle) {
+                  usePlayer.getState().toggleShuffle()
+                }
+              }}
+              className="inline-flex items-center gap-2 rounded-full border border-hairline bg-panel-hi px-3.5 py-2 text-xs font-semibold text-ink shadow-sm transition-transform hover:scale-105 active:scale-95"
+            >
+              <ShuffleIcon size={13} /> Shuffle
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!list.length) return
+                list.forEach((t) => usePlayer.getState().addToQueue(t))
+                showToast(`Added ${list.length} local track${list.length === 1 ? '' : 's'} to queue`)
+              }}
+              className="inline-flex items-center gap-2 rounded-full border border-hairline bg-panel-hi px-3.5 py-2 text-xs font-semibold text-ink shadow-sm transition-transform hover:scale-105 active:scale-95"
+            >
+              <QueueIcon size={13} /> Add to queue
+            </button>
+          </div>
         )}
       </div>
 

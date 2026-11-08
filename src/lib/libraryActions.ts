@@ -47,3 +47,22 @@ export async function movePlaylistEntry(entryId: number, dir: -1 | 1): Promise<v
     await db.playlistTracks.update(neighbor.id, { position: entry.position })
   })
 }
+
+export async function reorderPlaylistEntries(
+  playlistId: number,
+  fromIndex: number,
+  toIndex: number,
+): Promise<void> {
+  if (fromIndex === toIndex) return
+  const all = await db.playlistTracks.where('playlistId').equals(playlistId).sortBy('position')
+  if (fromIndex < 0 || fromIndex >= all.length || toIndex < 0 || toIndex >= all.length) return
+  const [moved] = all.splice(fromIndex, 1)
+  all.splice(toIndex, 0, moved)
+  await db.transaction('rw', db.playlistTracks, async () => {
+    for (let i = 0; i < all.length; i++) {
+      if (all[i].position !== i) {
+        await db.playlistTracks.update(all[i].id, { position: i })
+      }
+    }
+  })
+}

@@ -1,18 +1,24 @@
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useCallback, useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getAlbum, getAlbumTracks } from '../api/jamendo'
 import { TrackRow } from '../components/TrackRow'
 import { Cover } from '../components/MediaCard'
 import { DownloadIcon, PlayIcon, ShuffleIcon } from '../components/icons'
-import { SkeletonRows } from './Home'
+import { EmptyState, ErrorState, PageSkeleton } from '../components/States'
 import { usePlayer } from '../stores/playerStore'
 import type { Album, Track } from '../types'
 
 export function AlbumPage() {
   const { id = '' } = useParams()
+  const navigate = useNavigate()
   const [album, setAlbum] = useState<Album | null>(null)
   const [tracks, setTracks] = useState<Track[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [reloadCount, setReloadCount] = useState(0)
+
+  const retry = useCallback(() => {
+    setReloadCount((c) => c + 1)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -31,14 +37,23 @@ export function AlbumPage() {
     return () => {
       cancelled = true
     }
-  }, [id])
+  }, [id, reloadCount])
 
   if (error) {
     return (
       <div className="p-6">
-        <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm text-ink">{error}</div>
+        <ErrorState
+          title="Couldn't load album"
+          message={error}
+          onRetry={retry}
+          onBack={() => navigate(-1)}
+        />
       </div>
     )
+  }
+
+  if (!album && !tracks) {
+    return <PageSkeleton type="mixed" />
   }
 
   const context = `Album — ${album?.title ?? ''}`
@@ -81,7 +96,7 @@ export function AlbumPage() {
                 tracks?.length && usePlayer.getState().playQueue(tracks, 0, context)
               }
               disabled={!tracks?.length}
-              className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-on-accent transition-transform hover:scale-105 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-on-accent transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
             >
               <PlayIcon size={16} /> Play
             </button>
@@ -95,7 +110,7 @@ export function AlbumPage() {
                 p.playQueue(tracks, Math.floor(Math.random() * tracks.length), context)
               }}
               disabled={!tracks?.length}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-hairline text-ink hover:border-accent-hover hover:text-accent-hover disabled:opacity-50"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-hairline bg-panel-hi text-ink shadow-sm transition-transform hover:scale-105 active:scale-95 disabled:opacity-50"
               title="Shuffle"
             >
               <ShuffleIcon size={16} />
@@ -104,7 +119,7 @@ export function AlbumPage() {
               <button
                 type="button"
                 onClick={() => album.zip && window.open(album.zip, '_blank', 'noopener')}
-                className="inline-flex items-center gap-2 rounded-full border border-hairline px-4 py-2 text-xs font-semibold text-ink hover:border-accent-hover hover:text-accent-hover"
+                className="inline-flex items-center gap-2 rounded-full border border-hairline bg-panel-hi px-4 py-2 text-xs font-semibold text-ink shadow-sm transition-transform hover:scale-105 active:scale-95"
                 title="Download the whole album as a ZIP — legally, via Jamendo"
               >
                 <DownloadIcon size={14} /> Download album (ZIP)
@@ -117,11 +132,14 @@ export function AlbumPage() {
         </div>
       </header>
 
-      <div className="p-6 pt-4">
+      <div className="p-4 pt-4 sm:p-6 sm:pt-4">
         {tracks === null ? (
-          <SkeletonRows n={8} />
+          <PageSkeleton type="rows" />
         ) : tracks.length === 0 ? (
-          <p className="py-10 text-center text-sm text-ink-dim">This album has no tracks.</p>
+          <EmptyState
+            title="No tracks found"
+            description="This album does not currently have any tracks in the catalog."
+          />
         ) : (
           tracks.map((t, i) => <TrackRow key={t.id} track={t} tracks={tracks} index={i} context={context} />)
         )}

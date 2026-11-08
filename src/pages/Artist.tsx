@@ -1,20 +1,26 @@
-import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useCallback, useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { getArtist, getArtistAlbums, getArtistTopTracks } from '../api/jamendo'
 import { TrackRow } from '../components/TrackRow'
 import { CardRow, Section } from '../components/Section'
-import { MediaCard, Cover } from '../components/MediaCard'
+import { Cover, MediaCard } from '../components/MediaCard'
 import { PlayIcon } from '../components/icons'
-import { SkeletonCards, SkeletonRows } from './Home'
+import { EmptyState, ErrorState, PageSkeleton, SkeletonCards, SkeletonRows } from '../components/States'
 import { usePlayer } from '../stores/playerStore'
 import type { Album, ArtistInfo, Track } from '../types'
 
 export function ArtistPage() {
   const { id = '' } = useParams()
+  const navigate = useNavigate()
   const [artist, setArtist] = useState<ArtistInfo | null>(null)
   const [topTracks, setTopTracks] = useState<Track[] | null>(null)
   const [albums, setAlbums] = useState<Album[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [reloadCount, setReloadCount] = useState(0)
+
+  const retry = useCallback(() => {
+    setReloadCount((c) => c + 1)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -22,7 +28,7 @@ export function ArtistPage() {
     setTopTracks(null)
     setAlbums(null)
     setError(null)
-    void Promise.all([getArtist(id), getArtistTopTracks(id, 10), getArtistAlbums(id)])
+    void Promise.all([getArtist(id), getArtistTopTracks(id, 12), getArtistAlbums(id)])
       .then(([a, t, al]) => {
         if (cancelled) return
         setArtist(a)
@@ -35,19 +41,28 @@ export function ArtistPage() {
     return () => {
       cancelled = true
     }
-  }, [id])
+  }, [id, reloadCount])
 
   if (error) {
     return (
       <div className="p-6">
-        <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-sm text-ink">{error}</div>
+        <ErrorState
+          title="Couldn't load artist"
+          message={error}
+          onRetry={retry}
+          onBack={() => navigate(-1)}
+        />
       </div>
     )
   }
 
+  if (!artist && !topTracks) {
+    return <PageSkeleton type="mixed" />
+  }
+
   return (
     <div className="anim-rise">
-      <header className="flex items-end gap-6 bg-gradient-to-b from-white/10 to-transparent p-6 pt-10">
+      <header className="flex flex-col items-start gap-6 bg-gradient-to-b from-white/10 to-transparent p-6 pt-10 sm:flex-row sm:items-end">
         <Cover
           image={artist?.image}
           title={artist?.name ?? id}
@@ -66,17 +81,22 @@ export function ArtistPage() {
               usePlayer.getState().playQueue(topTracks, 0, `Artist — ${artist?.name ?? ''}`)
             }
             disabled={!topTracks?.length}
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-bold text-on-accent transition-transform hover:scale-105 disabled:opacity-50"
+            className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-xs font-bold text-on-accent shadow-md transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 sm:text-sm"
           >
             <PlayIcon size={16} /> Play top tracks
           </button>
         </div>
       </header>
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6 space-y-6">
         <Section title="Top tracks">
           {topTracks === null ? (
             <SkeletonRows n={5} />
+          ) : topTracks.length === 0 ? (
+            <EmptyState
+              title="No top tracks"
+              description="No popular tracks found for this artist."
+            />
           ) : (
             <div>
               {topTracks.map((t, i) => (
@@ -97,7 +117,7 @@ export function ArtistPage() {
           {albums === null ? (
             <SkeletonCards />
           ) : albums.length === 0 ? (
-            <p className="text-sm text-ink-dim">No albums found.</p>
+            <p className="text-sm text-ink-dim">No albums found for this artist.</p>
           ) : (
             <CardRow>
               {albums.map((a) => (

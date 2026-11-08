@@ -13,6 +13,7 @@ import { db } from '../db/db'
 import { HighlightText, TrackRow } from '../components/TrackRow'
 import { CardRow, Section } from '../components/Section'
 import { MediaCard, hueOf } from '../components/MediaCard'
+import { EmptyState, ErrorState, SkeletonCards, SkeletonRows } from '../components/States'
 import {
   HistoryIcon,
   PlayIcon,
@@ -20,7 +21,7 @@ import {
   SpinnerIcon,
   XIcon,
 } from '../components/icons'
-import { GENRES, SkeletonCards, SkeletonRows } from './Home'
+import { GENRES } from './Home'
 import { usePlayer } from '../stores/playerStore'
 import type { Album, ArtistInfo, LocalTrackRecord, Track } from '../types'
 
@@ -331,10 +332,7 @@ export function Search() {
       </div>
 
       {error && (
-        <div className="mb-6 rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm">
-          <p className="font-semibold text-ink">Search failed</p>
-          <p className="mt-1 text-ink-dim">{error}</p>
-        </div>
+        <ErrorState title="Search failed" message={error} className="mb-6" />
       )}
 
       {/* Query empty browse view: Recent searches + Moods & Genres browse grid */}
@@ -445,22 +443,13 @@ export function Search() {
       {hasQuery && (
         <>
           {allLoaded && !hasResults && !error ? (
-            <div className="my-12 rounded-2xl border border-hairline bg-panel p-8 text-center sm:p-12">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-panel-hi text-ink-dim">
-                <SearchIcon size={24} />
-              </div>
-              <h3 className="text-lg font-bold text-ink">No results found for &ldquo;{q}&rdquo;</h3>
-              <p className="mx-auto mt-2 max-w-md text-sm text-ink-dim">
-                Try fewer words, check the spelling, or switch the filter tab above. You can also explore popular genres below.
-              </p>
-              <button
-                type="button"
-                onClick={handleClear}
-                className="mt-5 inline-flex items-center gap-2 rounded-full bg-panel-hi px-4 py-2 text-xs font-semibold text-ink transition-transform hover:scale-105 active:scale-95 sm:text-sm"
-              >
-                Clear search
-              </button>
-            </div>
+            <EmptyState
+              icon={<SearchIcon size={24} />}
+              title={`No results found for "${q}"`}
+              description="Try fewer words, check the spelling, or switch the filter tab above."
+              action={{ label: 'Clear search', onClick: handleClear }}
+              className="my-10"
+            />
           ) : (
             <div className="space-y-6">
               {showLocal && (

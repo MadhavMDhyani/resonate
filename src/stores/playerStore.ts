@@ -29,6 +29,7 @@ interface PlayerState {
   addToQueue: (track: Track) => void
   playNextUp: (track: Track) => void
   jumpTo: (queueIndex: number) => void
+  moveInQueue: (fromIndex: number, toIndex: number) => void
   removeAt: (queueIndex: number) => void
   clearQueue: () => void
   togglePlay: () => void
@@ -134,6 +135,59 @@ export const usePlayer = create<PlayerState>()(
       currentTime: 0,
       duration: queue[queueIndex].duration || 0,
     }))
+  },
+
+  moveInQueue: (fromIndex, toIndex) => {
+    const { queue, currentIndex, order } = get()
+    if (
+      fromIndex === toIndex ||
+      fromIndex < 0 ||
+      fromIndex >= queue.length ||
+      toIndex < 0 ||
+      toIndex >= queue.length
+    ) {
+      return
+    }
+
+    const newQueue = [...queue]
+    const [moved] = newQueue.splice(fromIndex, 1)
+    newQueue.splice(toIndex, 0, moved)
+
+    let newCurrentIndex = currentIndex
+    if (currentIndex === fromIndex) {
+      newCurrentIndex = toIndex
+    } else if (fromIndex < currentIndex && toIndex >= currentIndex) {
+      newCurrentIndex = currentIndex - 1
+    } else if (fromIndex > currentIndex && toIndex <= currentIndex) {
+      newCurrentIndex = currentIndex + 1
+    }
+
+    const mapIndex = (oldIdx: number): number => {
+      if (oldIdx === fromIndex) return toIndex
+      if (fromIndex < toIndex) {
+        if (oldIdx > fromIndex && oldIdx <= toIndex) return oldIdx - 1
+      } else {
+        if (oldIdx >= toIndex && oldIdx < fromIndex) return oldIdx + 1
+      }
+      return oldIdx
+    }
+
+    let newOrder = order.map(mapIndex)
+    const fromOrderPos = order.indexOf(fromIndex)
+    const toOrderPos = order.indexOf(toIndex)
+    if (fromOrderPos !== -1 && toOrderPos !== -1) {
+      const [movedOrder] = newOrder.splice(fromOrderPos, 1)
+      newOrder.splice(toOrderPos, 0, movedOrder)
+    }
+
+    const newOrderPos = newOrder.indexOf(newCurrentIndex)
+
+    set({
+      queue: newQueue,
+      currentIndex: newCurrentIndex,
+      order: newOrder,
+      orderPos: Math.max(0, newOrderPos),
+    })
   },
 
   removeAt: (queueIndex) => {

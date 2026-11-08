@@ -6,6 +6,7 @@ import { TrackRow } from '../components/TrackRow'
 import { CardRow, Section } from '../components/Section'
 import { Cover, MediaCard, hueOf } from '../components/MediaCard'
 import { PlayIcon, SpinnerIcon } from '../components/icons'
+import { ErrorState, SkeletonCards, SkeletonRows } from '../components/States'
 import { usePlayer } from '../stores/playerStore'
 import type { Album, Track } from '../types'
 
@@ -258,17 +259,12 @@ export function Home() {
       {/* Popular Right Now */}
       <Section title="Popular right now" subtitle="Most played CC tracks this week">
         {popularError ? (
-          <div className="mb-4 rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm">
-            <p className="font-semibold text-ink">Could not load popular tracks</p>
-            <p className="mt-0.5 text-xs text-ink-dim">{popularError}</p>
-            <button
-              type="button"
-              onClick={loadPopular}
-              className="mt-2.5 rounded-full bg-panel-hi px-3 py-1 text-xs font-semibold text-ink hover:bg-elevated"
-            >
-              Retry
-            </button>
-          </div>
+          <ErrorState
+            title="Could not load popular tracks"
+            message={popularError}
+            onRetry={loadPopular}
+            className="mb-4"
+          />
         ) : popular === null ? (
           <SkeletonRows />
         ) : (
@@ -290,17 +286,12 @@ export function Home() {
       {/* Fresh Albums */}
       <Section title="Fresh albums" subtitle="Recently released under Creative Commons">
         {albumsError ? (
-          <div className="mb-4 rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm">
-            <p className="font-semibold text-ink">Could not load albums</p>
-            <p className="mt-0.5 text-xs text-ink-dim">{albumsError}</p>
-            <button
-              type="button"
-              onClick={loadAlbums}
-              className="mt-2.5 rounded-full bg-panel-hi px-3 py-1 text-xs font-semibold text-ink hover:bg-elevated"
-            >
-              Retry
-            </button>
-          </div>
+          <ErrorState
+            title="Could not load albums"
+            message={albumsError}
+            onRetry={loadAlbums}
+            className="mb-4"
+          />
         ) : albums === null ? (
           <SkeletonCards />
         ) : (
@@ -322,31 +313,4 @@ export function Home() {
   )
 }
 
-export function SkeletonRows({ n = 6 }: { n?: number }) {
-  return (
-    <div className="flex flex-col gap-2">
-      {Array.from({ length: n }, (_, i) => (
-        <div key={i} className="flex items-center gap-3 px-3 py-1.5">
-          <div className="h-10 w-10 animate-pulse rounded-md bg-panel-hi" />
-          <div className="flex-1">
-            <div className="h-3.5 w-1/3 animate-pulse rounded bg-panel-hi" />
-            <div className="mt-2 h-3 w-1/5 animate-pulse rounded bg-panel" />
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-export function SkeletonCards({ n = 6 }: { n?: number }) {
-  return (
-    <div className="flex gap-2 overflow-hidden">
-      {Array.from({ length: n }, (_, i) => (
-        <div key={i} className="w-40 shrink-0 rounded-xl bg-panel p-3">
-          <div className="h-36 w-36 animate-pulse rounded-md bg-panel-hi" />
-          <div className="mt-3 h-3.5 w-3/4 animate-pulse rounded bg-panel-hi" />
-        </div>
-      ))}
-    </div>
-  )
-}
+export { SkeletonCards, SkeletonRows } from '../components/States'

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import { hasClientId } from './api/jamendo'
 import { useAudioEngine } from './hooks/useAudioEngine'
 import { useApplyTheme } from './theme/themeStore'
@@ -14,7 +14,9 @@ import { NowPlaying } from './components/NowPlaying'
 import { MainMenu } from './components/MainMenu'
 import { ShortcutsDialog } from './components/ShortcutsDialog'
 import { Toaster } from './components/Toaster'
-import { MenuIcon } from './components/icons'
+import { NotFound } from './pages/NotFound'
+import { useOnlineStatus } from './hooks/useOnlineStatus'
+import { MenuIcon, WifiOffIcon } from './components/icons'
 import { Home } from './pages/Home'
 import { Search } from './pages/Search'
 import { AlbumPage } from './pages/Album'
@@ -42,6 +44,22 @@ function NowPlayingAnnouncer() {
   )
 }
 
+function OfflineBanner() {
+  const isOnline = useOnlineStatus()
+  if (isOnline) return null
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex items-center justify-center gap-2 border-b border-amber-500/30 bg-amber-500/15 px-4 py-2 text-center text-xs font-semibold text-amber-200 backdrop-blur-xs"
+    >
+      <WifiOffIcon size={14} className="shrink-0 text-amber-300" />
+      <span>You are offline. Streaming catalog tracks is unavailable; local files will still play.</span>
+    </div>
+  )
+}
+
 function Shell() {
   const { pathname } = useLocation()
   const mainRef = useRef<HTMLElement>(null)
@@ -54,6 +72,7 @@ function Shell() {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden">
+      <OfflineBanner />
       {/* Skip to main content link for keyboard & screen reader accessibility */}
       <a
         href="#main-content"
@@ -91,7 +110,7 @@ function Shell() {
             <Route path="/library" element={<Library />} />
             <Route path="/library/playlist/:id" element={<UserPlaylistPage />} />
             <Route path="/local" element={<LocalFiles />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
         <QueuePanel />

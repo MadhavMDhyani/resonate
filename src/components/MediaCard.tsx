@@ -50,6 +50,46 @@ export function Cover({
   )
 }
 
+export function MosaicCover({
+  covers,
+  title,
+  className = 'w-12 h-12',
+  round = false,
+}: {
+  covers?: (string | undefined)[]
+  title: string
+  className?: string
+  round?: boolean
+}) {
+  const valid = covers?.filter((c): c is string => Boolean(c)) ?? []
+
+  if (valid.length >= 4) {
+    return (
+      <div
+        className={`grid grid-cols-2 grid-rows-2 overflow-hidden shadow-md ${className} ${
+          round ? 'rounded-full' : 'rounded-md'
+        }`}
+      >
+        {valid.slice(0, 4).map((c, i) => (
+          <img
+            key={i}
+            src={c}
+            alt=""
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+        ))}
+      </div>
+    )
+  }
+
+  if (valid.length > 0) {
+    return <Cover image={valid[0]} title={title} className={className} round={round} />
+  }
+
+  return <Cover title={title} className={className} round={round} />
+}
+
 export function MediaCard({ title, altTitle, subtitle, image, to, onPlay, round }: MediaCardProps) {
   const alt = typeof title === 'string' ? title : altTitle ?? ''
   const body = (
