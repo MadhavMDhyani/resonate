@@ -3,6 +3,7 @@ import { getAudio } from '../audio/audioSingleton'
 import { getLocalObjectUrl } from '../local/localLibrary'
 import { usePlayer } from '../stores/playerStore'
 import { showToast } from '../stores/toastStore'
+import { recordHistory } from '../lib/history'
 import type { Track } from '../types'
 
 function updateMediaSession(track: Track | null): void {
@@ -41,6 +42,9 @@ export function useAudioEngine(): void {
     const onPlay = () => {
       consecutiveFailuresRef.current = 0
       usePlayer.setState({ isPlaying: true, isBuffering: false })
+      const { queue, currentIndex } = usePlayer.getState()
+      const t = queue[currentIndex]
+      if (t) void recordHistory(t)
     }
     const onPause = () => usePlayer.setState({ isPlaying: false, isBuffering: false })
     const onWaiting = () => usePlayer.setState({ isBuffering: true })

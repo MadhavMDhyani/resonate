@@ -1,5 +1,11 @@
 import Dexie, { type EntityTable } from 'dexie'
-import type { FavoriteRecord, LocalTrackRecord, PlaylistEntry, UserPlaylist } from '../types'
+import type {
+  FavoriteRecord,
+  HistoryRecord,
+  LocalTrackRecord,
+  PlaylistEntry,
+  UserPlaylist,
+} from '../types'
 
 export interface HandleRecord {
   key: string
@@ -12,6 +18,7 @@ export const db = new Dexie('resonate') as Dexie & {
   playlistTracks: EntityTable<PlaylistEntry, 'id'>
   localTracks: EntityTable<LocalTrackRecord, 'key'>
   handles: EntityTable<HandleRecord, 'key'>
+  history: EntityTable<HistoryRecord, 'id'>
 }
 
 db.version(1).stores({
@@ -20,4 +27,8 @@ db.version(1).stores({
   playlistTracks: '++id, playlistId, [playlistId+position]',
   localTracks: 'key, addedAt',
   handles: 'key',
+})
+
+db.version(2).stores({
+  history: 'id, playedAt',
 })

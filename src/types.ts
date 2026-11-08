@@ -77,3 +77,9 @@ export interface LocalTrackRecord {
   addedAt: number
   track: Track
 }
+
+export interface HistoryRecord {
+  id: string
+  track: Track
+  playedAt: number
+}
