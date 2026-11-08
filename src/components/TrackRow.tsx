@@ -244,15 +244,15 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
 
       <div className="min-w-0 flex-1">
         <p className={`truncate text-sm font-medium ${isCurrent ? 'text-accent-hover' : 'text-ink'}`}>
-          {track.title}
+          <HighlightText text={track.title} query={highlight} />
         </p>
         <p className="truncate text-xs text-ink-dim">
           {track.source === 'jamendo' && track.artistId ? (
             <Link to={`/artist/${track.artistId}`} className="hover:text-ink hover:underline">
-              {track.artist}
+              <HighlightText text={track.artist} query={highlight} />
             </Link>
           ) : (
-            track.artist
+            <HighlightText text={track.artist} query={highlight} />
           )}
         </p>
       </div>
@@ -261,10 +261,10 @@ export function TrackRow({ track, tracks, index, context, showAlbum, extraAction
         <div className="hidden w-1/4 min-w-0 truncate text-xs text-ink-dim md:block">
           {track.source === 'jamendo' && track.albumId ? (
             <Link to={`/album/${track.albumId}`} className="hover:text-ink hover:underline">
-              {track.album}
+              <HighlightText text={track.album ?? ''} query={highlight} />
             </Link>
           ) : (
-            track.album
+            <HighlightText text={track.album ?? ''} query={highlight} />
           )}
         </div>
       )}

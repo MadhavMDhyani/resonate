@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom'
 import { PlayIcon, MusicIcon } from './icons'
 
 interface MediaCardProps {
-  title: string
-  subtitle?: string
+  title: React.ReactNode
+  altTitle?: string
+  subtitle?: React.ReactNode
   image?: string
   to?: string
   onPlay?: () => void
@@ -49,21 +50,22 @@ export function Cover({
   )
 }
 
-export function MediaCard({ title, subtitle, image, to, onPlay, round }: MediaCardProps) {
+export function MediaCard({ title, altTitle, subtitle, image, to, onPlay, round }: MediaCardProps) {
+  const alt = typeof title === 'string' ? title : altTitle ?? ''
   const body = (
     <div className="anim-lift group/card relative w-40 shrink-0 rounded-xl bg-panel p-3 transition-colors hover:bg-panel-hi cursor-pointer">
       <div className="relative mb-3">
-        <Cover image={image} title={title} className="w-36 h-36 shadow-lg" round={round} />
+        <Cover image={image} title={alt} className="w-36 h-36 shadow-lg" round={round} />
         {onPlay && (
           <button
             type="button"
-            aria-label={`Play ${title}`}
+            aria-label={`Play ${alt}`}
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
               onPlay()
             }}
-            className="absolute right-2 bottom-2 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-on-accent opacity-0 shadow-xl transition-all translate-y-1 group-hover/card:translate-y-0 group-hover/card:opacity-100 hover:scale-105"
+            className="touch-visible absolute right-2 bottom-2 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-on-accent opacity-0 shadow-xl transition-all translate-y-1 group-hover/card:translate-y-0 group-hover/card:opacity-100 hover:scale-105"
           >
             <PlayIcon size={18} />
           </button>
