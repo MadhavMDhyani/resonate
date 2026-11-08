@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import {
@@ -11,9 +11,11 @@ import {
 } from '../api/jamendo'
 import { db } from '../db/db'
 import { HighlightText, TrackRow } from '../components/TrackRow'
+import { TrackTableHeader, type SortKey, type SortDir } from '../components/TrackTableHeader'
 import { CardRow, Section } from '../components/Section'
 import { MediaCard, hueOf } from '../components/MediaCard'
 import { EmptyState, ErrorState, SkeletonCards, SkeletonRows } from '../components/States'
+import { sortTracks, nextSort } from '../lib/sortTracks'
 import {
   HistoryIcon,
   PlayIcon,
@@ -88,6 +90,16 @@ export function Search() {
   const inputRef = useRef<HTMLInputElement>(null)
   const [recentSearches, setRecentSearches] = useState<string[]>(loadRecentSearches)
   const [loadingTag, setLoadingTag] = useState<string | null>(null)
+
+  // Sort state for the main Tracks section
+  const [sortKey, setSortKey] = useState<SortKey>('index')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
+
+  const handleSort = (key: SortKey) => {
+    const next = nextSort(sortKey, sortDir, key)
+    setSortKey(next.key)
+    setSortDir(next.dir)
+  }
 
   // Keep input in sync with back/forward nav
   useEffect(() => setInput(q), [q])

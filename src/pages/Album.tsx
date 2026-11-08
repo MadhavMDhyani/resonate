@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getAlbum, getAlbumTracks } from '../api/jamendo'
 import { TrackRow } from '../components/TrackRow'
+import { TrackTableHeader, type SortKey, type SortDir } from '../components/TrackTableHeader'
 import { Cover } from '../components/MediaCard'
 import { DownloadIcon, PlayIcon, ShuffleIcon } from '../components/icons'
 import { EmptyState, ErrorState, PageSkeleton } from '../components/States'
 import { usePlayer } from '../stores/playerStore'
+import { sortTracks, nextSort } from '../lib/sortTracks'
 import type { Album, Track } from '../types'
 
 export function AlbumPage() {
@@ -15,6 +17,20 @@ export function AlbumPage() {
   const [tracks, setTracks] = useState<Track[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [reloadCount, setReloadCount] = useState(0)
+
+  const [sortKey, setSortKey] = useState<SortKey>('index')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
+
+  const handleSort = (key: SortKey) => {
+    const next = nextSort(sortKey, sortDir, key)
+    setSortKey(next.key)
+    setSortDir(next.dir)
+  }
+
+  const sortedTracks = useMemo(
+    () => (tracks ? sortTracks(tracks, sortKey, sortDir) : tracks),
+    [tracks, sortKey, sortDir],
+  )
 
   const retry = useCallback(() => {
     setReloadCount((c) => c + 1)
@@ -141,7 +157,12 @@ export function AlbumPage() {
             description="This album does not currently have any tracks in the catalog."
           />
         ) : (
-          tracks.map((t, i) => <TrackRow key={t.id} track={t} tracks={tracks} index={i} context={context} />)
+          <div>
+            <TrackTableHeader sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+            {sortedTracks!.map((t, i) => (
+              <TrackRow key={t.id} track={t} tracks={sortedTracks!} index={i} context={context} />
+            ))}
+          </div>
         )}
       </div>
     </div>

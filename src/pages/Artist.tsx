@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getArtist, getArtistAlbums, getArtistTopTracks } from '../api/jamendo'
 import { TrackRow } from '../components/TrackRow'
+import { TrackTableHeader, type SortKey, type SortDir } from '../components/TrackTableHeader'
 import { CardRow, Section } from '../components/Section'
 import { Cover, MediaCard } from '../components/MediaCard'
 import { PlayIcon } from '../components/icons'
 import { EmptyState, ErrorState, PageSkeleton, SkeletonCards, SkeletonRows } from '../components/States'
 import { usePlayer } from '../stores/playerStore'
+import { sortTracks, nextSort } from '../lib/sortTracks'
 import type { Album, ArtistInfo, Track } from '../types'
 
 export function ArtistPage() {
@@ -17,6 +19,20 @@ export function ArtistPage() {
   const [albums, setAlbums] = useState<Album[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [reloadCount, setReloadCount] = useState(0)
+
+  const [sortKey, setSortKey] = useState<SortKey>('index')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
+
+  const handleSort = (key: SortKey) => {
+    const next = nextSort(sortKey, sortDir, key)
+    setSortKey(next.key)
+    setSortDir(next.dir)
+  }
+
+  const sortedTracks = useMemo(
+    () => (topTracks ? sortTracks(topTracks, sortKey, sortDir) : topTracks),
+    [topTracks, sortKey, sortDir],
+  )
 
   const retry = useCallback(() => {
     setReloadCount((c) => c + 1)
@@ -99,11 +115,12 @@ export function ArtistPage() {
             />
           ) : (
             <div>
-              {topTracks.map((t, i) => (
+              <TrackTableHeader sortKey={sortKey} sortDir={sortDir} onSort={handleSort} />
+              {sortedTracks!.map((t, i) => (
                 <TrackRow
                   key={t.id}
                   track={t}
-                  tracks={topTracks}
+                  tracks={sortedTracks!}
                   index={i}
                   showAlbum
                   context={`Artist — ${artist?.name ?? ''}`}
