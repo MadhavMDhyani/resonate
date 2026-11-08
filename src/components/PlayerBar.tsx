@@ -47,10 +47,11 @@ export function PlayerBar() {
   const effDuration = duration || track?.duration || 0
 
   return (
-    <footer className="shrink-0 px-2 pb-2">
-      <div className="glass flex h-[68px] items-center gap-3 rounded-full px-4">
+    <footer className="shrink-0 px-2 pb-1.5 md:pb-2">
+      {/* Desktop player bar (hidden below md) */}
+      <div className="glass hidden h-[68px] items-center gap-3 rounded-full px-4 md:flex">
         {/* Left: track info — clicking opens the full Now Playing view */}
-        <div className="flex w-[30%] min-w-0 items-center gap-2">
+        <div className="flex min-w-0 flex-1 max-w-[32%] items-center gap-2">
           {track ? (
             <>
               <button
@@ -92,7 +93,7 @@ export function PlayerBar() {
         </div>
 
         {/* Center: transport + seek */}
-        <div className="flex flex-1 flex-col items-center justify-center gap-0.5">
+        <div className="flex flex-1 min-w-0 max-w-xl flex-col items-center justify-center gap-0.5">
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -139,7 +140,7 @@ export function PlayerBar() {
               {repeat === 'one' ? <RepeatOneIcon size={16} /> : <RepeatIcon size={16} />}
             </button>
           </div>
-          <div className="flex w-full max-w-xl items-center gap-2">
+          <div className="flex w-full items-center gap-2">
             <span className="w-10 text-right text-[11px] tabular-nums text-ink-dim">
               {fmtTime(currentTime)}
             </span>
@@ -160,16 +161,17 @@ export function PlayerBar() {
         </div>
 
         {/* Right: fullscreen, download, queue, volume */}
-        <div className="flex w-[30%] items-center justify-end gap-3">
+        <div className="flex shrink-0 items-center justify-end gap-2 lg:gap-3">
           {track?.source === 'jamendo' && track.audiodownload && track.downloadAllowed !== false && (
             <button
               type="button"
               aria-label="Download this track (free)"
               title={`Free download — ${track.license ?? 'Creative Commons'}`}
               onClick={() => void downloadTrack(track)}
-              className="flex items-center gap-1.5 rounded-full border border-hairline px-3 py-1.5 text-xs font-semibold text-ink-dim transition-colors hover:border-accent-hover hover:text-accent-hover"
+              className="flex items-center gap-1.5 rounded-full border border-hairline px-2.5 py-1.5 text-xs font-semibold text-ink-dim transition-colors hover:border-accent-hover hover:text-accent-hover lg:px-3"
             >
-              <DownloadIcon size={14} /> Download
+              <DownloadIcon size={14} />
+              <span className="hidden xl:inline">Download</span>
             </button>
           )}
           {track && (
@@ -202,7 +204,7 @@ export function PlayerBar() {
           </button>
           <input
             type="range"
-            className="slider w-24"
+            className="slider w-16 lg:w-24"
             min={0}
             max={1}
             step={0.01}
@@ -212,6 +214,76 @@ export function PlayerBar() {
             style={{ '--fill': pct(muted ? 0 : volume, 1) } as CSSProperties}
           />
         </div>
+      </div>
+
+      {/* Mobile mini-player (flex below md, hidden on md+) */}
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label={track ? `Now playing: ${track.title} by ${track.artist}. Tap to expand.` : 'No track playing'}
+        onClick={() => track && useUi.getState().setNowPlayingOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            if (track) useUi.getState().setNowPlayingOpen(true)
+          }
+        }}
+        className="glass relative flex h-14 w-full cursor-pointer items-center gap-2.5 overflow-hidden rounded-xl px-2.5 shadow-lg md:hidden"
+      >
+        {/* Thin progress line along top edge */}
+        <div className="absolute inset-x-0 top-0 h-[2.5px] bg-white/15">
+          <div
+            className="h-full bg-accent transition-[width] duration-150"
+            style={{ width: pct(currentTime, effDuration) }}
+          />
+        </div>
+
+        {track ? (
+          <>
+            <div className="relative shrink-0">
+              <Cover image={track.cover} title={track.title} className="h-10 w-10 rounded-lg object-cover" />
+            </div>
+            <div className="min-w-0 flex-1 pr-1">
+              <p className="truncate text-sm font-semibold text-ink leading-tight">{track.title}</p>
+              <p className="truncate text-xs text-ink-dim leading-tight">{track.artist}</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+                onClick={() => void toggleFavorite(track)}
+                className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+                  isFav ? 'text-accent-hover' : 'text-ink-dim hover:text-ink'
+                }`}
+              >
+                {isFav ? <HeartFilledIcon size={18} /> : <HeartIcon size={18} />}
+              </button>
+              <button
+                type="button"
+                aria-label={isPlaying ? 'Pause' : 'Play'}
+                onClick={() => usePlayer.getState().togglePlay()}
+                className="flex h-10 w-10 items-center justify-center rounded-full transition-transform active:scale-95"
+                style={{ background: 'var(--x-text)', color: 'var(--x-base)' }}
+              >
+                {isPlaying ? <PauseIcon size={18} /> : <PlayIcon size={18} />}
+              </button>
+              <button
+                type="button"
+                aria-label="Queue"
+                onClick={() => useUi.getState().toggleQueue()}
+                className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                  queueOpen ? 'text-accent-hover' : 'text-ink-dim hover:text-ink'
+                }`}
+              >
+                <QueueIcon size={18} />
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="flex w-full items-center justify-between px-2 text-xs text-ink-dim">
+            <span>Nothing playing</span>
+          </div>
+        )}
       </div>
     </footer>
   )

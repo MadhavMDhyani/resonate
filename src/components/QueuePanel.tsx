@@ -1,25 +1,23 @@
+import { useEffect } from 'react'
 import { usePlayer } from '../stores/playerStore'
 import { useUi } from '../ui/uiStore'
 import { Cover } from './MediaCard'
 import { PlayIcon, XIcon } from './icons'
 import { fmtTime } from '../lib/format'
 
-export function QueuePanel() {
-  const open = useUi((s) => s.queueOpen)
+function QueueContent({ onClose }: { onClose: () => void }) {
   const queue = usePlayer((s) => s.queue)
   const order = usePlayer((s) => s.order)
   const orderPos = usePlayer((s) => s.orderPos)
   const currentIndex = usePlayer((s) => s.currentIndex)
   const context = usePlayer((s) => s.context)
 
-  if (!open) return null
-
   const current = queue[currentIndex]
   const upcoming = order.slice(orderPos + 1).map((ix) => ({ ix, track: queue[ix] }))
 
   return (
-    <aside className="glass sticky top-0 hidden h-full w-80 shrink-0 flex-col rounded-2xl p-3 lg:flex">
-      <div className="mb-2 flex items-center justify-between px-1">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="mb-2 flex shrink-0 items-center justify-between px-1">
         <div>
           <h2 className="text-base font-bold text-ink">Queue</h2>
           {context && <p className="text-xs text-ink-dim">{context}</p>}
@@ -29,7 +27,7 @@ export function QueuePanel() {
             <button
               type="button"
               onClick={() => usePlayer.getState().clearQueue()}
-              className="text-xs text-ink-dim hover:text-ink"
+              className="rounded px-2 py-1 text-xs text-ink-dim hover:bg-panel-hi hover:text-ink"
             >
               Clear
             </button>
@@ -37,8 +35,8 @@ export function QueuePanel() {
           <button
             type="button"
             aria-label="Close queue"
-            onClick={() => useUi.getState().setQueueOpen(false)}
-            className="text-ink-dim hover:text-ink"
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-ink-dim hover:bg-panel-hi hover:text-ink"
           >
             <XIcon size={16} />
           </button>
@@ -56,10 +54,10 @@ export function QueuePanel() {
               <p className="px-1 pb-1 text-xs font-semibold uppercase tracking-wider text-ink-dim/70">
                 Now playing
               </p>
-              <div className="anim-rise mb-3 flex items-center gap-2 rounded-md bg-panel-hi p-2">
-                <Cover image={current.cover} title={current.title} className="h-10 w-10" />
+              <div className="anim-rise mb-3 flex items-center gap-2.5 rounded-lg bg-panel-hi p-2">
+                <Cover image={current.cover} title={current.title} className="h-10 w-10 shrink-0 rounded-md" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-accent-hover">{current.title}</p>
+                  <p className="truncate text-sm font-semibold text-accent-hover">{current.title}</p>
                   <p className="truncate text-xs text-ink-dim">{current.artist}</p>
                 </div>
               </div>
@@ -68,14 +66,14 @@ export function QueuePanel() {
 
           {upcoming.length > 0 && (
             <p className="px-1 pb-1 text-xs font-semibold uppercase tracking-wider text-ink-dim/70">
-              Next up
+              Next up ({upcoming.length})
             </p>
           )}
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-0.5">
             {upcoming.map(({ ix, track }) => (
               <div
                 key={`${track.id}-${ix}`}
-                className="group flex items-center gap-2 rounded-md p-1.5 hover:bg-panel-hi"
+                className="group flex min-h-[44px] items-center gap-2 rounded-lg p-1.5 hover:bg-panel-hi"
               >
                 <button
                   type="button"
@@ -83,7 +81,7 @@ export function QueuePanel() {
                   onClick={() => usePlayer.getState().jumpTo(ix)}
                   className="relative shrink-0"
                 >
-                  <Cover image={track.cover} title={track.title} className="h-9 w-9" />
+                  <Cover image={track.cover} title={track.title} className="h-9 w-9 rounded-md" />
                   <span className="absolute inset-0 flex items-center justify-center rounded-md bg-black/50 text-white opacity-0 group-hover:opacity-100">
                     <PlayIcon size={14} />
                   </span>
@@ -103,7 +101,7 @@ export function QueuePanel() {
                   type="button"
                   aria-label={`Remove ${track.title} from queue`}
                   onClick={() => usePlayer.getState().removeAt(ix)}
-                  className="shrink-0 text-ink-dim/70 opacity-0 group-hover:opacity-100 hover:text-ink"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-dim/70 hover:bg-panel hover:text-ink lg:opacity-0 lg:group-hover:opacity-100"
                 >
                   <XIcon size={14} />
                 </button>
@@ -112,6 +110,72 @@ export function QueuePanel() {
           </div>
         </div>
       )}
-    </aside>
+    </div>
+  )
+}
+
+export function QueuePanel() {
+  const open = useUi((s) => s.queueOpen)
+  const close = () => useUi.getState().setQueueOpen(false)
+
+  // Esc closes
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open])
+
+  if (!open) return null
+
+  return (
+    <>
+      {/* Desktop aside panel (lg+) */}
+      <aside className="glass sticky top-0 hidden h-full w-80 shrink-0 flex-col rounded-2xl p-3 lg:flex">
+        <QueueContent onClose={close} />
+      </aside>
+
+      {/* Mobile & tablet bottom sheet (<lg) */}
+      <div className="lg:hidden">
+        {/* Backdrop */}
+        <div
+          className="anim-fade fixed inset-0 z-40 bg-black/60 backdrop-blur-xs"
+          onClick={close}
+          aria-hidden="true"
+        />
+
+        {/* Bottom sheet */}
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Current queue"
+          className="anim-rise glass-strong fixed inset-x-0 bottom-0 z-50 flex max-h-[82dvh] flex-col rounded-t-3xl border-t border-hairline p-4 shadow-2xl"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)' }}
+        >
+          {/* Drag handle */}
+          <div
+            className="mx-auto mb-2.5 h-1.5 w-12 shrink-0 cursor-grab rounded-full bg-ink-dim/40 active:cursor-grabbing"
+            onTouchStart={(e) => {
+              const startY = e.touches[0].clientY
+              const onMove = (me: TouchEvent) => {
+                if (me.touches[0].clientY - startY > 60) {
+                  close()
+                  window.removeEventListener('touchmove', onMove)
+                }
+              }
+              const onEnd = () => {
+                window.removeEventListener('touchmove', onMove)
+                window.removeEventListener('touchend', onEnd)
+              }
+              window.addEventListener('touchmove', onMove)
+              window.addEventListener('touchend', onEnd)
+            }}
+          />
+          <QueueContent onClose={close} />
+        </div>
+      </div>
+    </>
   )
 }
