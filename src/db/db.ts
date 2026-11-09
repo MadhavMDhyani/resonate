@@ -32,3 +32,7 @@ db.version(1).stores({
 db.version(2).stores({
   history: 'id, playedAt',
 })
+
+db.version(3).stores({
+  localTracks: 'key, addedAt',
+})

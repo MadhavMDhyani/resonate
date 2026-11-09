@@ -27,6 +27,15 @@ export interface Track {
   fileName?: string
   /** key of the FileSystemFileHandle stored in IndexedDB */
   handleKey?: string
+  /** Audio format details for local tracks */
+  format?: {
+    container?: string
+    codec?: string
+    ext: string
+    tier: 1 | 2 | 3
+    supportedNatively: boolean
+    label: string
+  }
 }
 
 export interface Album {
