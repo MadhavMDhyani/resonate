@@ -1,4 +1,4 @@
-import { Track } from '../types'
+import type { Track } from '../types'
 import { db } from '../db/db'
 import { pcmToWav } from './pcmToWav'
 import { decode as flacDecode } from './decoders/flac'

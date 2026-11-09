@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ACCENT_PRESETS } from '../theme/color'
 import { useTheme, type ThemeMode } from '../theme/themeStore'
 import { PaletteIcon } from './icons'
+import { useBackground } from '../stores/backgroundStore'
 
 const MODES: { id: ThemeMode; label: string }[] = [
   { id: 'system', label: 'System' },
@@ -13,14 +14,8 @@ const MODES: { id: ThemeMode; label: string }[] = [
 export function ThemeControls() {
   const mode = useTheme((s) => s.mode)
   const accentId = useTheme((s) => s.accentId)
-  const background = useBackground((s) => s.mode)
-  const setBackground = useBackground((s) => s.setMode)
-  const mode = useTheme((s) => s.mode)
-  const accentId = useTheme((s) => s.accentId)
-  const background = useBackground((s) => s.mode)
-  const setBackground = useBackground((s) => s.setMode)
-  const mode = useTheme((s) => s.mode)
-  const accentId = useTheme((s) => s.accentId)
+  const bgMode = useBackground((s) => s.mode)
+  const setBgMode = useBackground((s) => s.setMode)
 
   return (
     <div>
@@ -51,9 +46,7 @@ export function ThemeControls() {
             onClick={() => useTheme.getState().setAccentId(p.id)}
             style={{ background: p.hex }}
             className={`h-7 w-7 rounded-full transition-transform hover:scale-110 ${
-              accentId === p.id
-                ? 'ring-2 ring-ink ring-offset-2 ring-offset-[var(--x-elevated)]'
-                : ''
+              accentId === p.id ? 'ring-2 ring-ink ring-offset-2 ring-offset-[var(--x-elevated)]' : ''
             }`}
           />
         ))}
@@ -63,13 +56,27 @@ export function ThemeControls() {
         type="button"
         onClick={() => useTheme.getState().setAccentId('auto')}
         className={`w-full rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${
-          accentId === 'auto'
-            ? 'border-accent bg-accent/15 text-ink'
-            : 'border-hairline text-ink-dim hover:text-ink'
+          accentId === 'auto' ? 'border-accent bg-accent/15 text-ink' : 'border-hairline text-ink-dim hover:text-ink'
         }`}
       >
         Auto — theme follows the album art
       </button>
+
+      <p className="mt-4 mb-2 text-xs font-bold uppercase tracking-wider text-ink-dim">Background</p>
+      <div className="flex rounded-full bg-panel-hi p-1">
+        {['off', 'subtle', 'full'].map((b) => (
+          <button
+            key={b}
+            type="button"
+            onClick={() => setBgMode(b as any)}
+            className={`flex-1 rounded-full px-2 py-1.5 text-xs font-semibold transition-colors ${
+              bgMode === b ? 'bg-elevated text-ink shadow' : 'text-ink-dim hover:text-ink'
+            }`}
+          >
+            {b.charAt(0).toUpperCase() + b.slice(1)}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

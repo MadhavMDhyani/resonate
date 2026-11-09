@@ -76,6 +76,8 @@ export const usePlayer = create<PlayerState>()(
       shuffle: false,
       repeat: 'off',
       context: null,
+      loadingState: 'idle',
+      decodeProgress: 0,
 
   playQueue: (tracks, startIndex = 0, context) => {
     if (!tracks.length) return
@@ -233,6 +235,8 @@ export const usePlayer = create<PlayerState>()(
       currentTime: 0,
       duration: 0,
       context: null,
+      loadingState: 'idle',
+      decodeProgress: 0,
     })
   },
 

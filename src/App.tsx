@@ -133,7 +133,7 @@ function Shell() {
 }
 
 export default function App() {
-  const mode = useBackground((s) => s.mode)
+
   const [ready, setReady] = useState(() => hasClientId())
 
   // Mount exactly once at the root: owns the <audio> element wiring and the
