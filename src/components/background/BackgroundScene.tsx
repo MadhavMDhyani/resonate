@@ -56,8 +56,8 @@ export default function BackgroundScene() {
         Color,
         AmbientLight,
         DirectionalLight,
-        UniformsUtils,
         Vector2,
+        DoubleSide,
       } = THREE
 
       const canvas = canvasRef.current
