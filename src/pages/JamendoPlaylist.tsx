@@ -3,8 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { getPlaylist } from '../api/jamendo'
 import { TrackRow } from '../components/TrackRow'
 import { TrackTableHeader, type SortKey, type SortDir } from '../components/TrackTableHeader'
-import { Cover } from '../components/MediaCard'
-import { PlayIcon } from '../components/icons'
+import { HeroBanner } from '../components/HeroBanner'
 import { EmptyState, ErrorState, PageSkeleton, SkeletonRows } from '../components/States'
 import { usePlayer } from '../stores/playerStore'
 import { sortTracks, nextSort } from '../lib/sortTracks'
@@ -75,34 +74,26 @@ export function JamendoPlaylistPage() {
   }
 
   return (
-    <div className="anim-rise">
-      <header className="flex flex-col items-start gap-6 bg-gradient-to-b from-white/10 to-transparent p-6 pt-10 sm:flex-row sm:items-end">
-        <Cover title={name ?? id} className="h-40 w-40 shadow-2xl" />
-        <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-wider text-ink-dim">
-            Community playlist
-          </p>
-          <h1 className="mt-1 text-3xl font-extrabold tracking-tight text-ink md:text-4xl">
-            {name ?? 'Loading…'}
-          </h1>
-          <p className="mt-2 text-sm text-ink-dim">
-            {creator && <span>by {creator}</span>}
-            {tracks?.length ? <span className="text-ink-dim"> · {tracks.length} tracks</span> : null}
-          </p>
-          <button
-            type="button"
-            onClick={() =>
-              tracks?.length && usePlayer.getState().playQueue(tracks, 0, `Playlist — ${name ?? ''}`)
-            }
-            disabled={!tracks?.length}
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-xs font-bold text-on-accent shadow-md transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 sm:text-sm"
-          >
-            <PlayIcon size={16} /> Play
-          </button>
-        </div>
-      </header>
+    <div className="anim-rise p-4 sm:p-6">
+      <HeroBanner
+        badge="Community playlist"
+        title={name ?? 'Loading…'}
+        subtitle={creator ? `by ${creator}` : undefined}
+        metadata={tracks?.length ? <span>{tracks.length} tracks</span> : null}
+        cover={tracks?.[0]?.cover}
+        onPlay={() =>
+          tracks?.length && usePlayer.getState().playQueue(tracks, 0, `Playlist — ${name ?? ''}`)
+        }
+        playDisabled={!tracks?.length}
+        onShuffle={() => {
+          if (!tracks?.length) return
+          const p = usePlayer.getState()
+          if (!p.shuffle) p.toggleShuffle()
+          p.playQueue(tracks, Math.floor(Math.random() * tracks.length), `Playlist — ${name ?? ''}`)
+        }}
+      />
 
-      <div className="p-4 pt-4 sm:p-6 sm:pt-4">
+      <div className="pt-2">
         {tracks === null ? (
           <SkeletonRows n={8} />
         ) : tracks.length === 0 ? (

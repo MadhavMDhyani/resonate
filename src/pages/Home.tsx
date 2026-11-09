@@ -4,6 +4,7 @@ import { getNewAlbums, getPopularTracks, getTracksByTag } from '../api/jamendo'
 import { db } from '../db/db'
 import { TrackRow } from '../components/TrackRow'
 import { TrackTableHeader, type SortKey, type SortDir } from '../components/TrackTableHeader'
+import { HeroBanner } from '../components/HeroBanner'
 import { CardRow, Section } from '../components/Section'
 import { Cover, MediaCard, hueOf } from '../components/MediaCard'
 import { PlayIcon, SpinnerIcon } from '../components/icons'
@@ -27,13 +28,6 @@ export const GENRES = [
   'world',
 ]
 
-function getGreeting(): string {
-  const hour = new Date().getHours()
-  if (hour < 12) return 'Good morning'
-  if (hour < 18) return 'Good afternoon'
-  return 'Good evening'
-}
-
 export function Home() {
   const [popular, setPopular] = useState<Track[] | null>(null)
   const [albums, setAlbums] = useState<Album[] | null>(null)
@@ -51,9 +45,6 @@ export function Home() {
     setPopularSortKey(next.key)
     setPopularSortDir(next.dir)
   }
-
-  const isPlaying = usePlayer((s) => s.isPlaying)
-  const queue = usePlayer((s) => s.queue)
 
   // Query recently played from Dexie version(2)
   const recentHistory = useLiveQuery(
@@ -136,41 +127,55 @@ export function Home() {
     [popular, popularSortKey, popularSortDir],
   )
 
+  // Featured hero item (trending album or top popular track)
+  const featured = albums?.[0] ?? popular?.[0]
+
   return (
     <div className="anim-rise p-4 sm:p-6">
-      {/* Compact Header & Greeting */}
-      <div className="glass mb-6 rounded-2xl bg-gradient-to-br from-accent/20 via-panel to-panel p-5 sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
-              {getGreeting()}
-            </h1>
-            <p className="mt-1 max-w-xl text-xs text-ink-dim sm:text-sm">
-              Free Creative Commons music streamed and downloaded legally, plus your local library.
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2.5">
-            {queue.length > 0 && (
-              <button
-                type="button"
-                onClick={() => usePlayer.getState().togglePlay()}
-                className="inline-flex items-center gap-2 rounded-full border border-hairline bg-panel-hi px-4 py-2 text-xs font-semibold text-ink shadow-md transition-transform hover:scale-105 active:scale-95 sm:text-sm"
-              >
-                <PlayIcon size={14} className="text-accent" />
-                <span>{isPlaying ? 'Pause' : 'Jump back in'}</span>
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={() => popular?.length && usePlayer.getState().playQueue(popular, 0, 'Popular on Jamendo')}
-              disabled={!popular?.length}
-              className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2 text-xs font-bold text-on-accent shadow-md transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 sm:text-sm"
-            >
-              <PlayIcon size={14} /> Start listening
-            </button>
-          </div>
-        </div>
-      </div>
+      {/* Featured Hero Banner */}
+      {featured && (
+        <HeroBanner
+          badge="Featured today"
+          title={featured.title}
+          subtitle={`by ${featured.artist}`}
+          metadata={
+            <span>Free, Creative Commons music · High quality streaming & downloads</span>
+          }
+          cover={featured.cover}
+          onPlay={() => {
+            if ('releaseDate' in featured) {
+              void playAlbum(featured.id, featured.title)
+            } else if (popular) {
+              usePlayer.getState().playQueue(popular, 0, 'Popular on Jamendo')
+            }
+          }}
+          onShuffle={() => {
+            if (popular?.length) {
+              const p = usePlayer.getState()
+              if (!p.shuffle) p.toggleShuffle()
+              p.playQueue(popular, Math.floor(Math.random() * popular.length), 'Popular on Jamendo')
+            }
+          }}
+        />
+      )}
+
+      {/* Jump back in (recently played) */}
+      {recentHistory && recentHistory.length > 0 && (
+        <Section title="Jump back in" subtitle="Pick up where you left off">
+          <CardRow>
+            {recentHistory.map(({ id, track: t }) => (
+              <MediaCard
+                key={id}
+                title={t.title}
+                subtitle={t.artist}
+                image={t.cover}
+                to={t.source === 'jamendo' && t.albumId ? `/album/${t.albumId}` : undefined}
+                onPlay={() => usePlayer.getState().playTrackNow(t, 'Jump back in')}
+              />
+            ))}
+          </CardRow>
+        </Section>
+      )}
 
       {/* Quick Picks row: 6 compact track tiles for 1-tap play */}
       {quickPicks.length > 0 && (
@@ -255,24 +260,6 @@ export function Home() {
           })}
         </div>
       </div>
-
-      {/* Recently Played */}
-      {recentHistory && recentHistory.length > 0 && (
-        <Section title="Recently played">
-          <CardRow>
-            {recentHistory.map(({ id, track: t }) => (
-              <MediaCard
-                key={id}
-                title={t.title}
-                subtitle={t.artist}
-                image={t.cover}
-                to={t.source === 'jamendo' && t.albumId ? `/album/${t.albumId}` : undefined}
-                onPlay={() => usePlayer.getState().playTrackNow(t, 'Recently played')}
-              />
-            ))}
-          </CardRow>
-        </Section>
-      )}
 
       {/* Popular Right Now */}
       <Section title="Popular right now" subtitle="Most played CC tracks this week">

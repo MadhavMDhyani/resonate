@@ -7,16 +7,17 @@ export interface AccentColors {
   seedHex: string
 }
 
-export const DEFAULT_SEED = '#1a73e8'
+export const DEFAULT_SEED = '#d6fb00'
 
-/** Google-style preset seeds (Material You palette row). */
+/** Preset seeds with Electric Lime as the primary default. */
 export const ACCENT_PRESETS = [
+  { id: 'lime', name: 'Electric Lime', hex: '#d6fb00' },
+  { id: 'teal', name: 'Deep Teal', hex: '#00545f' },
   { id: 'blue', name: 'Blue', hex: '#1a73e8' },
   { id: 'green', name: 'Green', hex: '#188038' },
   { id: 'amber', name: 'Amber', hex: '#f9ab00' },
   { id: 'red', name: 'Red', hex: '#ea4335' },
   { id: 'purple', name: 'Purple', hex: '#a142f4' },
-  { id: 'teal', name: 'Teal', hex: '#12b5cb' },
   { id: 'orange', name: 'Orange', hex: '#fa7b17' },
   { id: 'pink', name: 'Pink', hex: '#f5426e' },
 ] as const
@@ -38,6 +39,22 @@ function getContrastColor(hex: string): string {
  * Contrast check ensures onAccent meets WCAG AA (>= 4.5:1) for any seed.
  */
 export function paletteFromSeed(seedHex: string, dark: boolean): AccentColors {
+  if (seedHex.toLowerCase() === '#d6fb00' || seedHex.toLowerCase() === DEFAULT_SEED.toLowerCase()) {
+    return dark
+      ? {
+          accent: '#d6fb00',
+          hover: '#e4ff4d',
+          onAccent: '#00323a',
+          seedHex,
+        }
+      : {
+          accent: '#00545f',
+          hover: '#006b78',
+          onAccent: '#ecffb6',
+          seedHex,
+        }
+  }
+
   const p = TonalPalette.fromInt(argbFromHex(seedHex))
   const accent = p.tone(dark ? 80 : 40)
   const hover = p.tone(dark ? 88 : 30)

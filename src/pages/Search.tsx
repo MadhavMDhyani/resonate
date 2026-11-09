@@ -296,6 +296,21 @@ export function Search() {
 
   return (
     <div className="anim-rise p-4 sm:p-6">
+      <div className="mb-4">
+        <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
+          Search
+        </h1>
+        {hasQuery ? (
+          <p className="label-micro mt-1">
+            {tracksCount + albumsCount + artistsCount + localCount} RESULTS FOR &ldquo;{q}&rdquo;
+          </p>
+        ) : (
+          <p className="text-xs text-ink-dim mt-1">
+            Explore Creative Commons music by title, artist, or tags
+          </p>
+        )}
+      </div>
+
       {/* Sticky search bar + filter chips */}
       <div className="sticky top-0 z-10 -mx-4 mb-6 bg-base/85 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
         <div className="relative max-w-xl">

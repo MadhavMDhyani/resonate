@@ -160,9 +160,14 @@ export function Library() {
   return (
     <div className="anim-rise p-4 sm:p-6">
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
-          Your Library
-        </h1>
+        <div>
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
+            Your Library
+          </h1>
+          <p className="label-micro mt-1">
+            {playlistsWithMeta?.length ?? 0} PLAYLISTS · {favorites?.length ?? 0} FAVORITES · {localTracks?.length ?? 0} LOCAL TRACKS
+          </p>
+        </div>
         {/* Navigation Tabs */}
         <div className="flex items-center gap-1.5 rounded-full border border-hairline bg-panel p-1">
           <button

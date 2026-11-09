@@ -18,7 +18,7 @@ export const useTheme = create<ThemeState>()(
   persist(
     (set) => ({
       mode: 'system',
-      accentId: 'auto',
+      accentId: 'lime',
       setMode: (mode) => set({ mode }),
       setAccentId: (accentId) => set({ accentId }),
     }),
@@ -26,8 +26,8 @@ export const useTheme = create<ThemeState>()(
   ),
 )
 
-const DARK_META = '#0b0b10'
-const LIGHT_META = '#f2f2f7'
+const DARK_META = '#021a1e'
+const LIGHT_META = '#f5ffd9'
 
 /**
  * Mount once at the app root: resolves the effective dark/light mode and the

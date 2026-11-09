@@ -90,7 +90,7 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
-   Liquid glass
+   Liquid glass & Micro-interactions
 --------------------------------------------------------------------------- */
 .glass {
   background: var(--x-glass-bg);
@@ -105,6 +105,84 @@ body {
   backdrop-filter: blur(40px) saturate(1.9);
   border: 1px solid var(--x-glass-border);
   box-shadow: var(--x-glass-shadow);
+}
+
+@supports (backdrop-filter: url(#liquid-glass)) {
+  .glass-liquid {
+    -webkit-backdrop-filter: url(#liquid-glass) blur(18px) saturate(1.7);
+    backdrop-filter: url(#liquid-glass) blur(18px) saturate(1.7);
+  }
+}
+
+/* Glass buttons interactive spring states */
+.glass button,
+button.glass {
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.15s ease, background-color 0.15s ease;
+}
+.glass button:active,
+button.glass:active {
+  transform: scale(0.96);
+  border-color: rgba(236, 255, 182, 0.35);
+}
+.glass button:hover,
+button.glass:hover {
+  border-color: rgba(236, 255, 182, 0.25);
+}
+
+/* Pointer glow specular highlight */
+.pointer-glow {
+  position: relative;
+}
+.pointer-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    280px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(236, 255, 182, 0.15),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .pointer-glow:hover::before {
+    opacity: 1;
+  }
+}
+
+/* Performance guard: when Now Playing overlay is open, drop blur on the player bar behind it */
+body:has([aria-label="Now Playing"]) footer .glass {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background: var(--x-panel) !important;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-strong,
+  .glass-liquid {
+    background: var(--x-elevated) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    border: 1px solid var(--x-hairline) !important;
+  }
+  .grain::before {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pointer-glow::before {
+    display: none !important;
+  }
+  .glass button:active,
+  button.glass:active {
+    transform: none !important;
+  }
 }
 
 /* Matte surface utility */

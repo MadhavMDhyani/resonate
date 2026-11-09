@@ -29,20 +29,21 @@ export function Cover({
   className?: string
   round?: boolean
 }) {
+  const radius = round ? 'rounded-full' : 'rounded-[14px]'
   if (image) {
     return (
       <img
         src={image}
         alt={title}
         loading="lazy"
-        className={`${className ?? ''} ${round ? 'rounded-full' : 'rounded-md'} object-cover`}
+        className={`${className ?? ''} ${radius} object-cover`}
       />
     )
   }
   const h = hueOf(title)
   return (
     <div
-      className={`${className ?? ''} ${round ? 'rounded-full' : 'rounded-md'} flex items-center justify-center text-white/30`}
+      className={`${className ?? ''} ${radius} flex items-center justify-center text-white/30`}
       style={{ background: `linear-gradient(135deg, hsl(${h} 30% 28%), hsl(${(h + 40) % 360} 35% 14%))` }}
     >
       <MusicIcon size={24} />
@@ -62,13 +63,12 @@ export function MosaicCover({
   round?: boolean
 }) {
   const valid = covers?.filter((c): c is string => Boolean(c)) ?? []
+  const radius = round ? 'rounded-full' : 'rounded-[14px]'
 
   if (valid.length >= 4) {
     return (
       <div
-        className={`grid grid-cols-2 grid-rows-2 overflow-hidden shadow-md ${className} ${
-          round ? 'rounded-full' : 'rounded-md'
-        }`}
+        className={`grid grid-cols-2 grid-rows-2 overflow-hidden shadow-md ${className} ${radius}`}
       >
         {valid.slice(0, 4).map((c, i) => (
           <img
@@ -93,9 +93,9 @@ export function MosaicCover({
 export function MediaCard({ title, altTitle, subtitle, image, to, onPlay, round }: MediaCardProps) {
   const alt = typeof title === 'string' ? title : altTitle ?? ''
   const body = (
-    <div className="anim-lift group/card relative w-40 shrink-0 rounded-xl bg-panel p-3 transition-colors hover:bg-panel-hi cursor-pointer">
-      <div className="relative mb-3">
-        <Cover image={image} title={alt} className="w-36 h-36 shadow-lg" round={round} />
+    <div className="group/card relative w-36 sm:w-40 shrink-0 cursor-pointer transition-transform hover:-translate-y-1">
+      <div className="relative mb-2.5 overflow-hidden rounded-[14px]">
+        <Cover image={image} title={alt} className="w-full aspect-square shadow-md transition-transform duration-300 group-hover/card:scale-105" round={round} />
         {onPlay && (
           <button
             type="button"
@@ -105,7 +105,7 @@ export function MediaCard({ title, altTitle, subtitle, image, to, onPlay, round 
               e.stopPropagation()
               onPlay()
             }}
-            className="touch-visible absolute right-2 bottom-2 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-on-accent opacity-0 shadow-xl transition-all translate-y-1 group-hover/card:translate-y-0 group-hover/card:opacity-100 hover:scale-105"
+            className="touch-visible absolute right-2.5 bottom-2.5 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-on-accent opacity-0 shadow-xl transition-all translate-y-2 group-hover/card:translate-y-0 group-hover/card:opacity-100 focus:opacity-100 group-focus-within/card:opacity-100 hover:scale-110 active:scale-95"
           >
             <PlayIcon size={18} />
           </button>
@@ -116,7 +116,7 @@ export function MediaCard({ title, altTitle, subtitle, image, to, onPlay, round 
     </div>
   )
   return to ? (
-    <Link to={to} className="block shrink-0">
+    <Link to={to} className="block shrink-0 focus:outline-none">
       {body}
     </Link>
   ) : (

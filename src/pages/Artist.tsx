@@ -3,9 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { getArtist, getArtistAlbums, getArtistTopTracks } from '../api/jamendo'
 import { TrackRow } from '../components/TrackRow'
 import { TrackTableHeader, type SortKey, type SortDir } from '../components/TrackTableHeader'
+import { HeroBanner } from '../components/HeroBanner'
 import { CardRow, Section } from '../components/Section'
-import { Cover, MediaCard } from '../components/MediaCard'
-import { PlayIcon } from '../components/icons'
+import { MediaCard } from '../components/MediaCard'
 import { EmptyState, ErrorState, PageSkeleton, SkeletonCards, SkeletonRows } from '../components/States'
 import { usePlayer } from '../stores/playerStore'
 import { sortTracks, nextSort } from '../lib/sortTracks'
@@ -76,36 +76,46 @@ export function ArtistPage() {
     return <PageSkeleton type="mixed" />
   }
 
-  return (
-    <div className="anim-rise">
-      <header className="flex flex-col items-start gap-6 bg-gradient-to-b from-white/10 to-transparent p-6 pt-10 sm:flex-row sm:items-end">
-        <Cover
-          image={artist?.image}
-          title={artist?.name ?? id}
-          round
-          className="h-36 w-36 shadow-2xl md:h-44 md:w-44"
-        />
-        <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-wider text-ink-dim">Artist</p>
-          <h1 className="mt-1 truncate text-3xl font-extrabold tracking-tight text-ink md:text-4xl">
-            {artist?.name ?? 'Loading…'}
-          </h1>
-          <button
-            type="button"
-            onClick={() =>
-              topTracks?.length &&
-              usePlayer.getState().playQueue(topTracks, 0, `Artist — ${artist?.name ?? ''}`)
-            }
-            disabled={!topTracks?.length}
-            className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-xs font-bold text-on-accent shadow-md transition-transform hover:scale-105 active:scale-95 disabled:opacity-50 sm:text-sm"
-          >
-            <PlayIcon size={16} /> Play top tracks
-          </button>
-        </div>
-      </header>
+  const [discoFilter, setDiscoFilter] = useState<'all' | 'albums'>('all')
+  const [showAllAlbums, setShowAllAlbums] = useState(false)
 
-      <div className="p-4 sm:p-6 space-y-6">
-        <Section title="Top tracks">
+  const displayedAlbums = useMemo(() => {
+    if (!albums) return []
+    return showAllAlbums ? albums : albums.slice(0, 10)
+  }, [albums, showAllAlbums])
+
+  return (
+    <div className="anim-rise p-4 sm:p-6">
+      <HeroBanner
+        badge="Verified artist"
+        title={artist?.name ?? 'Loading…'}
+        subtitle="Creative Commons Artist"
+        metadata={
+          <span>
+            {albums?.length ? <span>{albums.length} releases</span> : null}
+            {topTracks?.length ? <span> · {topTracks.length} popular tracks</span> : null}
+          </span>
+        }
+        cover={artist?.image}
+        onPlay={() =>
+          topTracks?.length &&
+          usePlayer.getState().playQueue(topTracks, 0, `Artist — ${artist?.name ?? ''}`)
+        }
+        playDisabled={!topTracks?.length}
+        onShuffle={() => {
+          if (!topTracks?.length) return
+          const p = usePlayer.getState()
+          if (!p.shuffle) p.toggleShuffle()
+          p.playQueue(topTracks, Math.floor(Math.random() * topTracks.length), `Artist — ${artist?.name ?? ''}`)
+        }}
+        onRadio={() => {
+          if (!topTracks?.length) return
+          usePlayer.getState().playQueue(topTracks, 0, `${artist?.name} Radio`)
+        }}
+      />
+
+      <div className="space-y-8 pt-2">
+        <Section title="Popular">
           {topTracks === null ? (
             <SkeletonRows n={5} />
           ) : topTracks.length === 0 ? (
@@ -130,14 +140,54 @@ export function ArtistPage() {
           )}
         </Section>
 
-        <Section title="Albums">
+        <section>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-bold tracking-tight text-ink">Discography</h2>
+              {/* Filter chips as in Image 1 */}
+              <div className="flex items-center gap-1.5 rounded-full border border-hairline bg-panel p-1">
+                <button
+                  type="button"
+                  onClick={() => setDiscoFilter('all')}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                    discoFilter === 'all'
+                      ? 'bg-accent text-on-accent'
+                      : 'text-ink-dim hover:text-ink'
+                  }`}
+                >
+                  Popular releases
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDiscoFilter('albums')}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                    discoFilter === 'albums'
+                      ? 'bg-accent text-on-accent'
+                      : 'text-ink-dim hover:text-ink'
+                  }`}
+                >
+                  Albums
+                </button>
+              </div>
+            </div>
+            {albums && albums.length > 6 && (
+              <button
+                type="button"
+                onClick={() => setShowAllAlbums((s) => !s)}
+                className="text-xs font-bold uppercase tracking-wider text-accent hover:underline"
+              >
+                {showAllAlbums ? 'Show less' : 'See all'}
+              </button>
+            )}
+          </div>
+
           {albums === null ? (
             <SkeletonCards />
           ) : albums.length === 0 ? (
             <p className="text-sm text-ink-dim">No albums found for this artist.</p>
           ) : (
             <CardRow>
-              {albums.map((a) => (
+              {displayedAlbums.map((a) => (
                 <MediaCard
                   key={a.id}
                   title={a.title}
@@ -148,7 +198,7 @@ export function ArtistPage() {
               ))}
             </CardRow>
           )}
-        </Section>
+        </section>
       </div>
     </div>
   )
