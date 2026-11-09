@@ -143,9 +143,9 @@ export default function App() {
 
   if (!ready) return <SetupScreen onReady={() => setReady(true)} />
   return (<>
-      <Suspense fallback={null}>
-        <BackgroundScene />
-      </Suspense>
-      <Shell />
-    </>)
+    <Suspense fallback={null}>
+      <BackgroundScene />
+    </Suspense>
+    <Shell />
+  </>)
 }

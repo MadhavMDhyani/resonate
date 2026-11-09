@@ -16,7 +16,7 @@ export async function resolvePlayableSource(
   track: Track
 ): Promise<{ url: string; revoke: () => void }> {
   if (track.source === 'jamendo') {
-    return { url: track.audioUrl ?? '', revoke: () => {} }
+    return { url: track.audioUrl ?? '', revoke: () => { } }
   }
 
   if (!track.handleKey) throw new Error('Missing handleKey for local track')

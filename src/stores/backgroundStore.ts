@@ -17,3 +17,4 @@ export const useBackground = create<BackgroundState>()(
     { name: 'resonate-bg-settings' }
   )
 )
+
