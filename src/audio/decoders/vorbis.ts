@@ -25,3 +25,4 @@ export async function decode(file: File, onProgress?: (p: number) => void): Prom
     });
   });
 }
+
