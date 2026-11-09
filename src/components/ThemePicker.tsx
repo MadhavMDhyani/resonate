@@ -13,6 +13,14 @@ const MODES: { id: ThemeMode; label: string }[] = [
 export function ThemeControls() {
   const mode = useTheme((s) => s.mode)
   const accentId = useTheme((s) => s.accentId)
+  const background = useBackground((s) => s.mode)
+  const setBackground = useBackground((s) => s.setMode)
+  const mode = useTheme((s) => s.mode)
+  const accentId = useTheme((s) => s.accentId)
+  const background = useBackground((s) => s.mode)
+  const setBackground = useBackground((s) => s.setMode)
+  const mode = useTheme((s) => s.mode)
+  const accentId = useTheme((s) => s.accentId)
 
   return (
     <div>

@@ -3,6 +3,10 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import { hasClientId } from './api/jamendo'
 import { useAudioEngine } from './hooks/useAudioEngine'
 import { useApplyTheme } from './theme/themeStore'
+import { useBackground } from './stores/backgroundStore'
+import { Suspense, lazy } from 'react'
+const BackgroundScene = lazy(() => import('./components/background/BackgroundScene'))
+
 import { useGlobalShortcuts } from './hooks/useGlobalShortcuts'
 import { usePlayer } from './stores/playerStore'
 import { useUi } from './ui/uiStore'
@@ -129,6 +133,7 @@ function Shell() {
 }
 
 export default function App() {
+  const mode = useBackground((s) => s.mode)
   const [ready, setReady] = useState(() => hasClientId())
 
   // Mount exactly once at the root: owns the <audio> element wiring and the
@@ -137,5 +142,10 @@ export default function App() {
   useApplyTheme()
 
   if (!ready) return <SetupScreen onReady={() => setReady(true)} />
-  return <Shell />
+  return (<>
+      <Suspense fallback={null}>
+        <BackgroundScene />
+      </Suspense>
+      <Shell />
+    </>)
 }
