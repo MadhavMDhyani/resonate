@@ -22,33 +22,39 @@
 
 :root,
 html[data-theme="dark"] {
-  --x-base: #0b0b10;
-  --x-panel: rgba(255, 255, 255, 0.055);
-  --x-panel-hi: rgba(255, 255, 255, 0.11);
-  --x-elevated: #1c1c22;
-  --x-text: #f4f4f6;
-  --x-text-dim: #9b9ba3;
-  --x-hairline: rgba(255, 255, 255, 0.08);
-  --x-glass-bg: rgba(20, 20, 26, 0.55);
-  --x-glass-border: rgba(255, 255, 255, 0.09);
-  --x-glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
-  --x-slider-track: rgba(255, 255, 255, 0.22);
-  --x-scrim: rgba(5, 5, 8, 0.45);
+  --x-base: #021a1e;
+  --x-panel: #06262b;
+  --x-panel-hi: #0b3339;
+  --x-elevated: #0e3a41;
+  --x-text: #eef7d4;
+  --x-text-dim: #9fbf9b;
+  --x-hairline: rgba(236, 255, 182, 0.10);
+  --x-accent: #d6fb00;
+  --x-accent-hover: #e4ff4d;
+  --x-on-accent: #00323a;
+  --x-glass-bg: rgba(6, 38, 43, 0.65);
+  --x-glass-border: rgba(236, 255, 182, 0.15);
+  --x-glass-shadow: 0 12px 40px rgba(0, 40, 48, 0.45);
+  --x-slider-track: rgba(236, 255, 182, 0.2);
+  --x-scrim: rgba(2, 26, 30, 0.65);
 }
 
 html[data-theme="light"] {
-  --x-base: #f2f2f7;
-  --x-panel: rgba(255, 255, 255, 0.62);
-  --x-panel-hi: rgba(255, 255, 255, 0.95);
+  --x-base: #f5ffd9;
+  --x-panel: rgba(255, 255, 255, 0.68);
+  --x-panel-hi: rgba(255, 255, 255, 0.92);
   --x-elevated: #ffffff;
-  --x-text: #17171c;
-  --x-text-dim: #5c5c66;
-  --x-hairline: rgba(0, 0, 0, 0.07);
-  --x-glass-bg: rgba(255, 255, 255, 0.6);
-  --x-glass-border: rgba(255, 255, 255, 0.75);
-  --x-glass-shadow: 0 12px 40px rgba(30, 30, 60, 0.14);
-  --x-slider-track: rgba(0, 0, 0, 0.14);
-  --x-scrim: rgba(240, 240, 246, 0.35);
+  --x-text: #0a3a41;
+  --x-text-dim: #4a6a66;
+  --x-hairline: rgba(0, 84, 95, 0.12);
+  --x-accent: #00545f;
+  --x-accent-hover: #006b78;
+  --x-on-accent: #ecffb6;
+  --x-glass-bg: rgba(255, 255, 255, 0.65);
+  --x-glass-border: rgba(255, 255, 255, 0.8);
+  --x-glass-shadow: 0 12px 40px rgba(0, 84, 95, 0.12);
+  --x-slider-track: rgba(0, 84, 95, 0.18);
+  --x-scrim: rgba(245, 255, 217, 0.4);
 }
 
 html,
@@ -59,14 +65,14 @@ body,
 }
 
 body {
-  background-color: var(--x-base, #0b0b10);
-  color: var(--x-text, #f4f4f6);
+  background-color: var(--x-base, #021a1e);
+  color: var(--x-text, #eef7d4);
   font-family:
+    var(--font-ui),
+    "Figtree Variable",
     "Segoe UI",
     system-ui,
     -apple-system,
-    Roboto,
-    "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.35s ease, color 0.35s ease;
