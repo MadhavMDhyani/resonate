@@ -1,8 +1,9 @@
 import { parseBlob } from 'music-metadata'
 import { db } from '../db/db'
 import type { Track } from '../types'
+import { detectFormat } from '../audio/formats'
 
-const AUDIO_EXT = /\.(mp3|m4a|aac|flac|ogg|oga|opus|wav|webm)$/i
+const AUDIO_EXT = /\.(mp3|m4a|aac|flac|ogg|oga|opus|wav|webm|aif|aiff|aifc|wma|ape|wv|tta|dsf|dff|m4p|mka)$/i
 const MAX_COVER_BYTES = 150_000
 
 /** Object URLs for local files, created lazily at play time, revoked on removal. */
@@ -89,6 +90,7 @@ async function parseTrackFile(file: File, handleKey?: string): Promise<Track | n
   }
   if (!duration) duration = await probeDuration(file)
 
+  const format = await detectFormat(file);
   return {
     id: `local:${key}`,
     source: 'local',
@@ -101,6 +103,7 @@ async function parseTrackFile(file: File, handleKey?: string): Promise<Track | n
     handleKey,
     downloadAllowed: true,
     license: 'Local file',
+    format,
   }
 }
 
