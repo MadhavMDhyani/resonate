@@ -23,6 +23,11 @@ interface PlayerState {
   repeat: RepeatMode
   /** "Playing from ..." label */
   context: string | null
+  // Loading state for tier‑2 decoding
+  loadingState: 'idle' | 'decoding' | 'error'
+  // 0‑1 progress while decoding
+  decodeProgress: number
+
 
   playQueue: (tracks: Track[], startIndex?: number, context?: string) => void
   playTrackNow: (track: Track, context?: string) => void
