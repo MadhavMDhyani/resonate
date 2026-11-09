@@ -3,7 +3,7 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import { hasClientId } from './api/jamendo'
 import { useAudioEngine } from './hooks/useAudioEngine'
 import { useApplyTheme } from './theme/themeStore'
-import { useBackground } from './stores/backgroundStore'
+
 import { Suspense, lazy } from 'react'
 const BackgroundScene = lazy(() => import('./components/background/BackgroundScene'))
 

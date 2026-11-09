@@ -21,7 +21,7 @@ export async function decode(file: File): Promise<{ channels: Float32Array[]; sa
   if (readString(4) !== 'FORM') {
     throw new Error('Not an AIFF file (missing FORM)')
   }
-  const fileSize = view.getUint32(offset, false)
+
   offset += 4
   const formType = readString(4)
   if (formType !== 'AIFF' && formType !== 'AIFC') {
@@ -33,7 +33,7 @@ export async function decode(file: File): Promise<{ channels: Float32Array[]; sa
   let sampleSize = 0
   let sampleRate = 0
   let audioDataOffset = 0
-  let audioDataLength = 0
+
   let compression = 'NONE'
 
   // Parse chunks until we find COMM and SSND
@@ -63,10 +63,10 @@ export async function decode(file: File): Promise<{ channels: Float32Array[]; sa
         // Offset and blockSize (ignore) then audio data
         const dataOffset = view.getUint32(offset, false)
         offset += 4
-        const blockSize = view.getUint32(offset, false)
+        // blockSize ignored
         offset += 4
         audioDataOffset = offset + dataOffset
-        audioDataLength = chunkSize - 8 // subtract offset+blockSize fields
+
         break
       }
       default:
